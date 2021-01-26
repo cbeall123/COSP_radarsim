@@ -80,7 +80,7 @@ contains
   ! SUBROUTINE QUICKBEAM_OPTICS
   ! ######################################################################################
   subroutine quickbeam_optics(sd, rcfg, nprof, ngate, undef, hm_matrix, re_matrix,       &
-       Np_matrix, p_matrix, t_matrix, sh_matrix,z_vol,kr_vol)
+       Np_matrix, p_matrix, t_matrix, sh_matrix,z_vol,kr_vol,Nic)
     
     ! INPUTS
     type(size_distribution),intent(inout) :: &
@@ -106,6 +106,8 @@ contains
     real(wp),intent(out), dimension(nprof, ngate) :: &
          z_vol,         & ! Effective reflectivity factor (mm^6/m^3)
          kr_vol           ! Attenuation coefficient hydro (dB/km)
+    real(wp),intent(inout),dimension(nprof,ngate,rcfg%nhclass) :: &
+	 Nic		  ! Hydrometeor number concentration (cm^-3)
 
     ! INTERNAL VARIABLES   
     integer :: &
@@ -138,6 +140,7 @@ contains
     z_vol    = 0._wp
     z_ray    = 0._wp
     kr_vol   = 0._wp
+    Nic      = 0._wp
 
     do k=1,ngate       ! Loop over each profile (nprof)
        do pr=1,nprof
@@ -153,7 +156,7 @@ contains
           t_kelvin = t_matrix(pr,k)
           ! If there is hydrometeor in the volume
           if (hydro) then
-             rho_a = (p_matrix(pr,k))/(287._wp*(t_kelvin))
+             rho_a = (p_matrix(pr,k))/(287._wp*(t_kelvin)) !units kg m^-3
              
              ! Loop over hydrometeor type
              do tp=1,rcfg%nhclass
@@ -178,7 +181,8 @@ contains
                    !re_matrix(pr,k,tp)=Re
                 else
                    if (Np_matrix(pr,k,tp) > 0) then
-                      call errorMessage('WARNING(optics/quickbeam_optics.f90): Re and Np set for the same volume & hydrometeor type.  Np is being ignored.')
+                      call errorMessage('WARNING(optics/quickbeam_optics.f90): &
+		      Re and Np set for the same volume & hydrometeor type.  Np is being ignored.')
                    endif
                    Re = Re_internal
                    !Re = re_matrix(pr,k,tp)
@@ -249,9 +253,9 @@ contains
                          rcfg%rho_eff(tp,1:ns,iRe_type) = rhoice ! solid ice == equivalent volume approach
                          Deq = ( ( 6/pi*sd%apm(tp)/rhoice) ** one_third ) * ( (Di*1E-6) ** (sd%bpm(tp)/3._wp) )  * 1E6
                          ! alternative is to comment out above two lines and use the following block
-                         ! MG Mie approach - adjust density of sphere with D = D_characteristic to match particle density
+                         ! MG Mie approach - adjust density of sphere with D = D_characteristic to match particle densit                         !y
                          !
-                         ! rcfg%rho_eff(tp,1:ns,iRe_type) = (6/pi)*sd%apm(tp)*(Di*1E-6)**(sd%bpm(tp)-3)   !MG Mie approach
+                         ! rcfg%rho_eff(tp,1:ns,iRe_type) = (6/pi)*sd%apm(tp)*(Di*1E-6)**(sd%bpm(tp)-3)   !MG Mie approa                         !ch
                          
                          ! as the particle size gets small it is possible that the mass to size relationship of 
                          ! (given by power law in hclass.data) can produce impossible results 
@@ -298,6 +302,9 @@ contains
                          call errorMessage('ERROR(optics/quickbeam_optics.f90): Error: Np input does not match sum(N)')
                       endif
                    endif
+		   
+		   ! Adding path integral of DSD here to calculate Nic, hydrometeor number concentration
+		    Nic(pr,k,tp) = path_integral(Ni,Di,1,ns-1)/rho_a*1.E6_wp	
 
                    ! Clean up space
                    deallocate(Di,Ni,rhoi,xxa,Deq)
@@ -428,7 +435,8 @@ contains
              ! fixed Roj. Dec. 2010 -- after comment by S. Mcfarlane
              vu = (1/(0.2714_wp + 0.00057145_wp*Np*rho_a*1E-6))**2 ! units of Nt = Np*rhoa = #/cm^3
           else
-             call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Must specify a value for Np in each volume with Morrison/Martin Scheme.')
+             call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): &
+	     Must specify a value for Np in each volume with Morrison/Martin Scheme.')
              return
           endif
        elseif (abs(local_p3+1) > 1E-8) then
@@ -436,7 +444,8 @@ contains
           vu = local_p3 
        else
           ! vu isn't specified
-          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Must specify a value for vu for Modified Gamma distribution')
+          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re):&
+	  Must specify a value for vu for Modified Gamma distribution')
           return
        endif
        
@@ -448,7 +457,8 @@ contains
              if( abs(p1+1) > 1E-8 ) then  !   use default number concentration   
                 local_Np = p1 ! total number concentration / pa --- units kg^-1
              else
-                call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Must specify Np or default value (p1=Dm [um] or p2=Np [1/kg]) for Modified Gamma distribution')
+                call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re):&
+		 Must specify Np or default value (p1=Dm [um] or p2=Np [1/kg]) for Modified Gamma distribution')
                 return
              endif
           else
@@ -474,7 +484,8 @@ contains
        elseif (abs(p2+1) > 1E-8) then  ! lambda=ld has been specified as default
           ld = p2     ! should have units of microns^-1 
        else
-          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Must specify Np or default value (p1=No or p2=lambda) for Exponential distribution')
+          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): &
+	  Must specify Np or default value (p1=No or p2=lambda) for Exponential distribution')
           return
        endif
        Re = 1.5_wp/ld 
@@ -490,7 +501,8 @@ contains
        
        Re=0._wp  ! Not supporting LUT approach for power-law ...
        if(Np>0) then
-          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Variable Np not supported for Power Law distribution')
+          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): &
+	  Variable Np not supported for Power Law distribution')
           return
        endif
        
@@ -502,7 +514,8 @@ contains
        
        Re = p1
        if(Np>0) then
-          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Variable Np not supported for Monodispersed distribution')
+          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): &
+	  Variable Np not supported for Monodispersed distribution')
           return
        endif
        
@@ -519,7 +532,8 @@ contains
           !set natural log width
           log_sigma_g = local_p3 
        else
-          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): Must specify a value for sigma_g when using a Log-Normal distribution')
+          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:Calc_Re): &
+	  Must specify a value for sigma_g when using a Log-Normal distribution')
           return
        endif
        
@@ -532,7 +546,8 @@ contains
           elseif(abs(p2+1) < 1E-8) then
              local_Np=p1
           else
-             call errorMessage('ERROR(optics/quickbeam_optics.f90:Calc_Re): Must specify Np or default value (p2=Rg or p1=Np) for Log-Normal distribution')
+             call errorMessage('ERROR(optics/quickbeam_optics.f90:Calc_Re): &
+	     Must specify Np or default value (p2=Rg or p1=Np) for Log-Normal distribution')
           endif
           log_sigma_g = p3
           tmp1        = (Q*1E-3)/(2._wp**bpm*apm*local_Np)
@@ -667,7 +682,8 @@ contains
              ! fixed Roj. Dec. 2010 -- after comment by S. Mcfarlane
              vu = (1/(0.2714_wp + 0.00057145_wp*Np*rho_a*1E-6))**2._wp ! units of Nt = Np*rhoa = #/cm^3
           else
-             call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:dsd): Must specify a value for Np in each volume with Morrison/Martin Scheme.')
+             call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:dsd): &
+	     Must specify a value for Np in each volume with Morrison/Martin Scheme.')
              return
           endif
        elseif (abs(p3+1) > 1E-8) then
@@ -675,7 +691,8 @@ contains
           vu = p3 
        else
           ! vu isn't specified
-          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:dsd): Must specify a value for vu for Modified Gamma distribution')
+          call errorMessage('FATAL ERROR(optics/quickbeam_optics.f90:dsd): &
+	  Must specify a value for vu for Modified Gamma distribution')
           return
        endif
        
