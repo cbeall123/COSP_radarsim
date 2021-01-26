@@ -115,7 +115,8 @@ program cosp2_test
        dem_c        ! 11microm emissivity (convective cloud)
   real(wp),dimension(:,:,:),allocatable,target :: &
        frac_out,  & ! Subcolumn cloud cover (0/1)
-       Reff         ! Subcolumn effective radius
+       Reff       ! Subcolumn effective radius
+ 
 
   ! Input namelist fields
   integer ::                      & !
@@ -423,8 +424,8 @@ program cosp2_test
        LcfadDbze94, Ldbze94, Lparasolrefl,                                               &
        Ltbrttov, Lptradarflag0,Lptradarflag1,Lptradarflag2,Lptradarflag3,Lptradarflag4,  &
        Lptradarflag5,Lptradarflag6,Lptradarflag7,Lptradarflag8,Lptradarflag9,Lradarpia,  &
-       Lwr_occfreq, Lcfodd,                                                              &
-       Npoints, Ncolumns, Nlevels, Nlvgrid_local, rttov_Nchannels, cospOUT)
+       Lwr_occfreq, Lcfodd,                                                             &
+       Npoints, Ncolumns, Nlevels, Nlvgrid_local, rttov_Nchannels, N_HYDRO, cospOUT)
 
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! Break COSP up into pieces and loop over each COSP 'chunk'.
@@ -484,7 +485,9 @@ program cosp2_test
      ! Height at interface (nlevels+1). Set lowermost interface to 0.
      cospstateIN%hgt_matrix_half(:,1:Nlevels) = zlev_half(start_idx:end_idx,Nlevels:1:-1) ! km
      cospstateIN%hgt_matrix_half(:,Nlevels+1) = 0._wp
-     
+     allocate(cospIN%mr_hydroOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
+     allocate(cospIN%ReffOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
+     allocate(cospIN%NpOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      ! Generate subcolumns and compute optical inputs.
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -499,7 +502,7 @@ program cosp2_test
           dtau_c(start_idx:end_idx,nLevels:1:-1),dtau_s(start_idx:end_idx,nLevels:1:-1),       &
           dem_c(start_idx:end_idx,nLevels:1:-1),dem_s(start_idx:end_idx,nLevels:1:-1),         &
           cospstateIN,cospIN)
-
+     print*, 'use-precip: ',use_precipitation_fluxes
      call cpu_time(driver_time(6))
     
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -554,6 +557,7 @@ contains
     ! Outputs
     type(cosp_optical_inputs),intent(inout) :: cospIN
     type(cosp_column_inputs),intent(inout)  :: cospstateIN
+    !type(cosp_outputs),intent(out) :: r_hydroOUT
 
     ! Local variables
     type(rng_state),allocatable,dimension(:) :: rngs  ! Seeds for random number generator
@@ -567,7 +571,7 @@ contains
          frac_prec, MODIS_cloudWater, MODIS_cloudIce, fracPrecipIce, fracPrecipIce_statGrid,&
          MODIS_watersize,MODIS_iceSize, MODIS_opticalThicknessLiq,MODIS_opticalThicknessIce
     real(wp),dimension(:,:,:,:),allocatable :: &
-         mr_hydro, Reff, Np
+         Reff, Np, mr_hydro
     real(wp),dimension(nPoints,nLevels) :: &
          column_frac_out, column_prec_out, fl_lsrain, fl_lssnow, fl_lsgrpl, fl_ccrain, fl_ccsnow
     real(wp),dimension(nPoints,nColumns,Nlvgrid_local) :: tempOut
@@ -592,6 +596,7 @@ contains
        
        ! Sum up precipitation rates
        allocate(ls_p_rate(nPoints,nLevels),cv_p_rate(nPoints,Nlevels))
+       print*,'use-precip loc2: ',use_precipitation_fluxes
        if(use_precipitation_fluxes) then
           ls_p_rate(:,1:nLevels) = fl_lsrainIN + fl_lssnowIN + fl_lsgrplIN
           cv_p_rate(:,1:nLevels) = fl_ccrainIN + fl_ccsnowIN
@@ -678,7 +683,7 @@ contains
              Reff(:,k,:,I_CVSNOW) = ReffIN(:,:,I_CVSNOW)
           end where
        enddo
-       
+      
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        ! Convert the subcolumn mixing ratio and precipitation fluxes from gridbox mean
        ! values to fraction-based values. 
@@ -731,6 +736,18 @@ contains
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        if (use_precipitation_fluxes) then
           ! LS rain
+          print*,'n_ax - lsrain',n_ax(I_LSRAIN)
+          !print*,'fl_lsrain ', fl_lsrain
+          print*,'n_bx ',n_bx(I_LSRAIN)
+          print*,'alpha_x ',alpha_x(I_LSRAIN)
+          print*, 'c_x ', c_x(I_LSRAIN)
+          print*, 'd_x', d_x(I_LSRAIN)
+          print*, 'g_x', g_x(I_LSRAIN)
+          print*, 'gamma_3 ', gamma_3(I_LSRAIN)
+          print*, 'gamma_4 ', gamma_4(I_LSRAIN)
+          !print*, 'pressure', cospstateIN%pfull
+          print*, 'temperature ', cospstateIN%at
+
           call cosp_precip_mxratio(nPoints, nLevels, nColumns, cospstateIN%pfull,        &
                cospstateIN%at, frac_prec, 1._wp, n_ax(I_LSRAIN), n_bx(I_LSRAIN),         &
                alpha_x(I_LSRAIN), c_x(I_LSRAIN),   d_x(I_LSRAIN),   g_x(I_LSRAIN),       &
@@ -766,8 +783,9 @@ contains
                gamma_3(I_LSGRPL), gamma_4(I_LSGRPL), fl_lsgrpl,                          &
                mr_hydro(:,:,:,I_LSGRPL), Reff(:,:,:,I_LSGRPL))
           deallocate(frac_prec)
+!          print*,'mixing ratio LS rain ', mr_hydro(:,:,:,I_LSRAIN)
        endif
-
+       
     else
        cospIN%frac_out(:,:,:) = 1  
        allocate(mr_hydro(nPoints,1,nLevels,nHydro),Reff(nPoints,1,nLevels,nHydro),       &
@@ -778,7 +796,9 @@ contains
        mr_hydro(:,1,:,I_CVCICE) = mr_ccice
        Reff(:,1,:,:)            = ReffIN
     endif
-    
+    cospIN%mr_hydroOUT = mr_hydro
+    cospIN%ReffOUT = Reff
+    !cospIN%NpOUT = Np
     !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ! 11 micron emissivity
     !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -845,12 +865,13 @@ contains
        ! Loop over all subcolumns
        allocate(fracPrecipIce(nPoints,nColumns,nLevels))
        fracPrecipIce(:,:,:) = 0._wp
+
        do k=1,nColumns
           call quickbeam_optics(sd, rcfg_cloudsat, nPoints, nLevels, R_UNDEF,  &
                mr_hydro(:,k,:,1:nHydro)*1000._wp, Reff(:,k,:,1:nHydro)*1.e6_wp,&
                Np(:,k,:,1:nHydro), cospstateIN%pfull, cospstateIN%at,          &
                cospstateIN%qv, cospIN%z_vol_cloudsat(1:nPoints,k,:),           &
-               cospIN%kr_vol_cloudsat(1:nPoints,k,:))
+               cospIN%kr_vol_cloudsat(1:nPoints,k,:), cospIN%NpOUT(:,k,:,1:nHydro))
           
           ! At each model level, what fraction of the precipitation is frozen?
           where(mr_hydro(:,k,:,I_LSRAIN) .gt. 0 .or. mr_hydro(:,k,:,I_LSSNOW) .gt. 0 .or. &
@@ -922,8 +943,8 @@ contains
        
        ! Deallocate memory
        deallocate(MODIS_cloudWater,MODIS_cloudIce,MODIS_WaterSize,MODIS_iceSize,           &
-            MODIS_opticalThicknessLiq,MODIS_opticalThicknessIce,mr_hydro,                  &
-            Np,Reff)
+            MODIS_opticalThicknessLiq,MODIS_opticalThicknessIce,                           &
+            Np,Reff,mr_hydro)
     endif
   end subroutine subsample_and_optics
   
@@ -1052,7 +1073,7 @@ contains
                                     Lptradarflag3,Lptradarflag4,Lptradarflag5,           &
                                     Lptradarflag6,Lptradarflag7,Lptradarflag8,           &
                                     Lptradarflag9,Lradarpia,Lwr_occfreq,Lcfodd,          &
-                                    Npoints,Ncolumns,Nlevels,Nlvgrid,Nchan,x)
+                                    Npoints,Ncolumns,Nlevels,Nlvgrid,Nchan,nHydro,x)
      ! Inputs
      logical,intent(in) :: &
          Lpctisccp,        & ! ISCCP mean cloud top pressure
@@ -1169,7 +1190,8 @@ contains
           Ncolumns,        & ! Number of subgrid columns
           Nlevels,         & ! Number of model levels
           Nlvgrid,         & ! Number of levels in L3 stats computation
-          Nchan              ! Number of RTTOV channels  
+          Nchan,           & ! Number of RTTOV channels  
+          nHydro             ! Number of hydrometeor classes
           
      ! Outputs
      type(cosp_outputs),intent(out) :: &
@@ -1185,7 +1207,9 @@ contains
     if (Lmeantbisccp)    allocate(x%isccp_meantb(Npoints))
     if (Lmeantbclrisccp) allocate(x%isccp_meantbclr(Npoints))
     if (Lalbisccp)       allocate(x%isccp_meanalbedocld(Npoints))
-    
+
+    !allocate(x%mr_hydro(Npoints,Ncolumns,Nlevels,9))    
+
     ! MISR simulator
     if (LclMISR) then 
        allocate(x%misr_fq(Npoints,numMISRTauBins,numMISRHgtBins))
@@ -1329,6 +1353,11 @@ contains
     ! Joint MODIS/CloudSat Statistics
     if (Lwr_occfreq)  allocate(x%wr_occfreq_ntotal(Npoints,WR_NREGIME))
     if (Lcfodd)       allocate(x%cfodd_ntotal(Npoints,CFODD_NDBZE,CFODD_NICOD,CFODD_NCLASS))
+
+    ! Write out mr_hydroOUT
+    allocate(x%mr_hydroOUT(Npoints,Ncolumns,Nlevels,nHydro))
+    allocate(x%ReffOUT(Npoints,Ncolumns,Nlevels,nHydro))
+    allocate(x%NpOUT(Npoints,Ncolumns,Nlevels,nHydro))
 
   end subroutine construct_cosp_outputs
   
@@ -1716,7 +1745,18 @@ contains
         deallocate(y%wr_occfreq_ntotal)
         nullify(y%wr_occfreq_ntotal)
      endif
-
+     if (associated(y%mr_hydroOUT)) then
+        deallocate(y%mr_hydroOUT)
+        nullify(y%mr_hydroOUT)
+     endif
+     if (associated(y%ReffOUT)) then 
+        deallocate(y%ReffOUT)
+        nullify(y%ReffOUT)
+     endif
+     if (associated(y%NpOUT)) then 
+        deallocate(y%NpOUT)
+        nullify(y%NpOUT)
+     endif
    end subroutine destroy_cosp_outputs
   
  end program cosp2_test

@@ -26,7 +26,7 @@ contains
 
     integer :: fileID,status,ij
     integer,dimension(20)  :: dimID
-    integer,dimension(150) :: varID
+    integer,dimension(174) :: varID
     integer,dimension(Npoints) :: loc
     integer,dimension(Ncolumns) :: cosp_scol
     integer,dimension(2) :: bnds
@@ -395,7 +395,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(15),"units",        "1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))  
-       status = nf90_put_att(fileID,varID(15),"standard_name", "histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid")
+       status = nf90_put_att(fileID,varID(15),"standard_name", &
+       "histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))     
     endif
     if (associated(cospOUT%calipso_lidarcld)) then
@@ -453,7 +454,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(18),"units",        "m-1 sr-1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
-       status = nf90_put_att(fileID,varID(18),"standard_name", "volume_attenuated_backwards_scattering_function_in_air_assuming_no_aerosol_or_cloud")
+       status = nf90_put_att(fileID,varID(18),"standard_name", &
+       "volume_attenuated_backwards_scattering_function_in_air_assuming_no_aerosol_or_cloud")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))           
     endif
     if (associated(cospOUT%calipso_srbval) .or. associated(cospOUT%calipso_cfad_sr)) then    
@@ -692,7 +694,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(112),"units",        "m-1 sr-1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
-       status = nf90_put_att(fileID,varID(112),"standard_name", "grLidar532_volume_attenuated_backwards_scattering_function_in_air_assuming_no_aerosol_or_cloud")
+       status = nf90_put_att(fileID,varID(112),"standard_name", &
+       "grLidar532_volume_attenuated_backwards_scattering_function_in_air_assuming_no_aerosol_or_cloud")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))           
     endif
     !Height-Intensity histogram (SR)
@@ -703,7 +706,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(113),"units",        "1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))  
-       status = nf90_put_att(fileID,varID(113),"standard_name", "grLidar532_histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid")
+       status = nf90_put_att(fileID,varID(113),"standard_name", &
+       "grLidar532_histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))     
     endif
     if (associated(cospOUT%grLidar532_beta_tot)) then
@@ -794,7 +798,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(122),"units",        "m-1 sr-1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
-       status = nf90_put_att(fileID,varID(122),"standard_name", "atlid_volume_attenuated_backwards_scattering_function_in_air_assuming_no_aerosol_or_cloud")
+       status = nf90_put_att(fileID,varID(122),"standard_name", &
+       "atlid_volume_attenuated_backwards_scattering_function_in_air_assuming_no_aerosol_or_cloud")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))           
     endif
     !Height-Intensity histogram (SR)
@@ -805,7 +810,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(123),"units",        "1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))  
-       status = nf90_put_att(fileID,varID(123),"standard_name", "atlid_histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid")
+       status = nf90_put_att(fileID,varID(123),"standard_name", &
+       "atlid_histogram_of_backscattering_ratio_over_height_above_reference_ellipsoid")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))     
     endif
     if (associated(cospOUT%atlid_beta_tot)) then
@@ -815,7 +821,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(124),"units",        "m-1 sr-1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))      
-       status = nf90_put_att(fileID,varID(124),"standard_name", "volume_attenuated_backwards_scattering_function_in_air")
+       status = nf90_put_att(fileID,varID(124),"standard_name", &
+       "volume_attenuated_backwards_scattering_function_in_air")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
 
@@ -888,7 +895,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(23),"units",        "1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
-       status = nf90_put_att(fileID,varID(23),"standard_name", "histogram_of_equivalent_reflectivity_factor_over_height_above_reference_ellipsoid")
+       status = nf90_put_att(fileID,varID(23),"standard_name", &
+       "histogram_of_equivalent_reflectivity_factor_over_height_above_reference_ellipsoid")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status)) 
        status = nf90_def_var(fileID,"cloudsat_DBZE_BINS",nf90_float, (/dimID(14)/),varID(88))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
@@ -1276,7 +1284,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status)) 
     endif
     if (associated(cospOUT%modis_Optical_Thickness_vs_ReffICE)) then
-       status = nf90_def_var(fileID,"modis_Optical_Thickness_vs_ReffICE",nf90_float, (/dimID(1),dimID(5),dimID(16)/),varID(54))
+       status = nf90_def_var(fileID,"modis_Optical_Thickness_vs_ReffICE", &
+       nf90_float, (/dimID(1),dimID(5),dimID(16)/),varID(54))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(54),"long_name","MODIS Joint-PDF of optical-depth and ice particle size")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
@@ -1290,7 +1299,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))      
     endif
     if (associated(cospOUT%modis_Optical_Thickness_vs_ReffLIQ)) then
-       status = nf90_def_var(fileID,"modis_Optical_Thickness_vs_ReffLIQ",nf90_float, (/dimID(1),dimID(5),dimID(15)/),varID(55))
+       status = nf90_def_var(fileID,"modis_Optical_Thickness_vs_ReffLIQ",nf90_float, &
+       (/dimID(1),dimID(5),dimID(15)/),varID(55))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(55),"long_name","MODIS Joint-PDF of optical-depth and liquid particle size")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
@@ -1416,6 +1426,286 @@ contains
        status = nf90_put_att(fileID,varID(147),"standard_name", "modis_in-cloud_optical_depth")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif 
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"LSCLIQ",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(148))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(148),"long_name","large scale (stratiform) liquid mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(148),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(148),"standard_name", "LSCLIQ")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"LSCICE",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(149))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(149),"long_name","large scale (stratiform) ice mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(149),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(149),"standard_name", "LSCICE")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"LSRAIN",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(150))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(150),"long_name","large scale (stratiform) rain mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(150),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(150),"standard_name", "LSRAIN")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"LSSNOW",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(151))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(151),"long_name","large scale (stratiform) snow mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(151),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(151),"standard_name", "LSSNOW")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"CVCLIQ",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(152))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(152),"long_name","convective cloud liquid mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(152),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(152),"standard_name", "CVCLIQ")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"CVCICE",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(153))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(153),"long_name","convective cloud liquid mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(153),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(153),"standard_name", "CVCICE")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"CVRAIN",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(154))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(154),"long_name","convective cloud rain mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(154),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(154),"standard_name", "CVRAIN")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"CVSNOW",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(155))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(155),"long_name","convective cloud snow mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(155),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(155),"standard_name", "CVSNOW")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then                                                                                
+       status = nf90_def_var(fileID,"LSGRPL",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(156))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(156),"long_name","large scale (stratiform) graupel mixing ratio")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(156),"units",        "kg/kg")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(156),"standard_name", "LSGRPL")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffLSCLIQ",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(157))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(157),"long_name","large scale (stratiform) liquid effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(157),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(157),"standard_name", "ReffLSCLIQ")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffLSCICE",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(158))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(158),"long_name","large scale (stratiform) ice effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(158),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(158),"standard_name", "ReffLSCICE")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffLSRAIN",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(159))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(159),"long_name","large scale (stratiform) rain effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(159),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(159),"standard_name", "ReffLSRAIN")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffLSSNOW",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(160))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(160),"long_name","large scale (stratiform) snow effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(160),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(160),"standard_name", "ReffLSSNOW")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffCVCLIQ",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(161))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(161),"long_name","convective cloud liquid effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(161),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(161),"standard_name", "ReffCVCLIQ")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffCVCICE",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(162))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(162),"long_name","convective cloud ice effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(162),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(162),"standard_name", "ReffCVCICE")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffCVRAIN",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(163))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(163),"long_name","convective cloud rain effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(163),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(163),"standard_name", "ReffCVRAIN")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffCVSNOW",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(164))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(164),"long_name","convective cloud snow effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(164),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(164),"standard_name", "ReffCVSNOW")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then                                                                                
+       status = nf90_def_var(fileID,"ReffLSGRPL",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(165))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(165),"long_name","large scale (stratiform) graupel effective radius")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(165),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(165),"standard_name", "ReffLSGRPL")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpLSCLIQ",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(166))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(166),"long_name","large scale (stratiform) liquid number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(166),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(166),"standard_name", "NpLSCLIQ")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpLSCICE",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(167))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(167),"long_name","large scale (stratiform) ice number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(167),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(167),"standard_name", "NpLSCICE")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpLSCRAIN",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(168))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(168),"long_name","large scale (stratiform) rain number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(168),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(168),"standard_name", "NpLSRAIN")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpLSSNOW",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(169))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(169),"long_name","large scale (stratiform) snow number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(169),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(169),"standard_name", "NpLSSNOW")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpCVCLIQ",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(170))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(170),"long_name","convective liquid number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(170),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(170),"standard_name", "NpCVCLIQ")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpCVCICE",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(171))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(171),"long_name","convective ice number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(171),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(171),"standard_name", "NpCVCICE")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpCVRAIN",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(172))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(172),"long_name","convective rain number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(172),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(172),"standard_name", "NpCVRAIN")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpCVSNOW",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(173))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(173),"long_name","convective snow number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(173),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(173),"standard_name", "NpCVSNOW")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then                                                                                
+       status = nf90_def_var(fileID,"NpLSGRPL",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(174))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(174),"long_name","large scale (stratiform) graupel number concentration")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(174),"units",        "kg-1")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(174),"standard_name", "NpLSGRPL")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+
+
+
+
+
+
+
+
+
+
     
     ! ---------------------------------------------------------------------------------------
     ! Exit define mode
@@ -1538,7 +1828,8 @@ contains
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
     if (associated(cospOUT%calipso_srbval)) then
-       status = nf90_put_var(fileID,varID(19),reshape([cospOUT%calipso_srbval(1:SR_BINS),cospOUT%calipso_srbval(2:SR_BINS+1)],(/2,SR_BINS/)))
+       status = nf90_put_var(fileID,varID(19),reshape([cospOUT%calipso_srbval(1:SR_BINS),&
+       cospOUT%calipso_srbval(2:SR_BINS+1)],(/2,SR_BINS/)))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
     if (associated(cospOUT%calipso_srbval) .or. associated(cospOUT%calipso_cfad_sr)) then
@@ -1621,7 +1912,8 @@ contains
     endif
 
     if (associated(cospOUT%grLidar532_srbval)) then
-       status = nf90_put_var(fileID,varID(116),reshape([cospOUT%grLidar532_srbval(1:SR_BINS),cospOUT%grLidar532_srbval(2:SR_BINS+1)],(/2,SR_BINS/)))
+       status = nf90_put_var(fileID,varID(116),&
+       reshape([cospOUT%grLidar532_srbval(1:SR_BINS),cospOUT%grLidar532_srbval(2:SR_BINS+1)],(/2,SR_BINS/)))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
     if (associated(cospOUT%grLidar532_srbval) .or. associated(cospOUT%grLidar532_cfad_sr)) then
@@ -1658,7 +1950,8 @@ contains
     endif
 
     if (associated(cospOUT%atlid_srbval)) then
-       status = nf90_put_var(fileID,varID(126),reshape([cospOUT%atlid_srbval(1:SR_BINS),cospOUT%atlid_srbval(2:SR_BINS+1)],(/2,SR_BINS/)))
+       status = nf90_put_var(fileID,varID(126),&
+       reshape([cospOUT%atlid_srbval(1:SR_BINS),cospOUT%atlid_srbval(2:SR_BINS+1)],(/2,SR_BINS/)))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
     if (associated(cospOUT%atlid_srbval) .or. associated(cospOUT%atlid_cfad_sr)) then
@@ -1767,6 +2060,10 @@ contains
        status = nf90_put_var(fileID,varID(35),cospOUT%misr_cldarea)
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
+   ! if (associated(cospOUT%mr_hydro)) then
+   !    status = nf90_put_var(fileID,varID(35),cospOUT%mr_hydro)
+   !    if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+   ! endif
     ! MODIS simulator output
     if (associated(cospOUT%modis_Cloud_Fraction_Total_Mean)) then
        status = nf90_put_var(fileID,varID(36),cospOUT%modis_Cloud_Fraction_Total_Mean)
@@ -1893,8 +2190,115 @@ contains
        status = nf90_put_var(fileID,varID(147),CFODD_HISTICODcenters)
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
-
-    
+  
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(148),cospOUT%mr_hydroOUT(:,:,:,1))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(149),cospOUT%mr_hydroOUT(:,:,:,2))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif   
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(150),cospOUT%mr_hydroOUT(:,:,:,3))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(151),cospOUT%mr_hydroOUT(:,:,:,4))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(152),cospOUT%mr_hydroOUT(:,:,:,5))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(153),cospOUT%mr_hydroOUT(:,:,:,6))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(154),cospOUT%mr_hydroOUT(:,:,:,7))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(155),cospOUT%mr_hydroOUT(:,:,:,8))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mr_hydroOUT)) then
+       status = nf90_put_var(fileID,varID(156),cospOUT%mr_hydroOUT(:,:,:,9))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(157),cospOUT%ReffOUT(:,:,:,1))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(158),cospOUT%ReffOUT(:,:,:,2))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(159),cospOUT%ReffOUT(:,:,:,3))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(160),cospOUT%ReffOUT(:,:,:,4))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(161),cospOUT%ReffOUT(:,:,:,5))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(162),cospOUT%ReffOUT(:,:,:,6))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(163),cospOUT%ReffOUT(:,:,:,7))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(164),cospOUT%ReffOUT(:,:,:,8))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%ReffOUT)) then
+       status = nf90_put_var(fileID,varID(165),cospOUT%ReffOUT(:,:,:,9))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(166),cospOUT%NpOUT(:,:,:,1))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(167),cospOUT%NpOUT(:,:,:,2))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(168),cospOUT%NpOUT(:,:,:,3))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(169),cospOUT%NpOUT(:,:,:,4))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(170),cospOUT%NpOUT(:,:,:,5))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(171),cospOUT%NpOUT(:,:,:,6))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(172),cospOUT%NpOUT(:,:,:,7))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(173),cospOUT%NpOUT(:,:,:,8))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%NpOUT)) then
+       status = nf90_put_var(fileID,varID(174),cospOUT%NpOUT(:,:,:,9))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
     ! Close file
     status = nf90_close(fileID)
     if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
