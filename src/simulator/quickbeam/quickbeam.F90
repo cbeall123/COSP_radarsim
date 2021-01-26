@@ -409,7 +409,7 @@ contains
 
              ! 1a) Compute the PIA in all profiles containing hydrometeors
              if ( (Ze_non_out(i,pr,cloudsat_preclvl_index(i)).gt.-100) .and. (Ze_out(i,pr,cloudsat_preclvl_index(i)).gt.-100) ) then
-                if ( (Ze_non_out(i,pr,cloudsat_preclvl_index(i)).lt.100) .and. (Ze_out(i,pr,cloudsat_preclvl_index(i)).lt.100) ) then
+                if ((Ze_non_out(i,pr,cloudsat_preclvl_index(i)).lt.100) .and. (Ze_out(i,pr,cloudsat_preclvl_index(i)).lt.100) ) then
                    cloudsat_precip_pia(i,pr) = Ze_non_out(i,pr,cloudsat_preclvl_index(i)) - Ze_out(i,pr,cloudsat_preclvl_index(i))
                 endif
              endif
@@ -467,9 +467,12 @@ contains
           ! ################################################################################
           if (land(i) .eq. 1) then             
 	     ! 2a) Compute the PIA in all profiles containing hydrometeors
-             if ( (Ze_non_out(i,pr,cloudsat_preclvl_index(i)-1).gt.-100) .and. (Ze_out(i,pr,cloudsat_preclvl_index(i)-1).gt.-100) ) then
-                if ( (Ze_non_out(i,pr,cloudsat_preclvl_index(i)-1).lt.100) .and. (Ze_out(i,pr,cloudsat_preclvl_index(i)-1).lt.100) ) then
-                   cloudsat_precip_pia(i,pr) = Ze_non_out(i,pr,cloudsat_preclvl_index(i)-1) - Ze_out(i,pr,cloudsat_preclvl_index(i)-1)
+             if ( (Ze_non_out(i,pr,cloudsat_preclvl_index(i)-1).gt.-100) .and. &
+	            (Ze_out(i,pr,cloudsat_preclvl_index(i)-1).gt.-100) ) then
+                if ( (Ze_non_out(i,pr,cloudsat_preclvl_index(i)-1).lt.100) .and. &
+		     (Ze_out(i,pr,cloudsat_preclvl_index(i)-1).lt.100) ) then
+                   cloudsat_precip_pia(i,pr) = Ze_non_out(i,pr,cloudsat_preclvl_index(i)-1) - &
+		    Ze_out(i,pr,cloudsat_preclvl_index(i)-1)
                 endif
              endif
 
