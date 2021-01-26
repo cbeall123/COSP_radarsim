@@ -161,7 +161,7 @@ program cosp2_test
        rttov_Surfem                 ! RTTOV: Surface emissivity
   character(len=64) :: &
        cloudsat_micro_scheme        ! Microphysical scheme used in cloudsat radar simulator
-  character(len=65) :: &
+  character(len=66) :: &
        finput                       ! Input NetCDF file
   character(len=256) :: &
        foutput
