@@ -71,7 +71,23 @@ SUBROUTINE COSP_PRECIP_MXRATIO(Npoints,Nlevels,Ncolumns,p,T,prec_frac,prec_type,
                 do i=1,Npoints
                     if ((prec_frac(i,j,k)==prec_type).or.(prec_frac(i,j,k)==3.)) then
                         rho = p(i,k)/(287.05_wp*T(i,k))
+			if ((k==1).and.(j<10).and.(i<20)) then
+			   !print*,'mxratiobefore = ', mxratio(i,j,k)
+			   !print*, 'flux = ', flux(i,k)
+			   !print*, 'rho = ', rho
+			   !print*, 'rho0 = ', rho0
+			   !print*, 'g_x = ', g_x
+			   !print*, 'sigma = ', sigma
+			   !print*, 'one_over_xip1 = ', one_over_xip1
+			   CALL flush(6)
+			   CALL flush(0) 
+			endif
                         mxratio(i,j,k)=(flux(i,k)*((rho/rho0)**g_x)*sigma)**one_over_xip1
+			if ((k==1).and.(j<10).and.(i<20)) then
+			   !print*, 'mxratioafter  = ', mxratio(i,j,k)
+			   CALL flush(6)
+			   CALL flush(0) 
+			endif
                         mxratio(i,j,k)=mxratio(i,j,k)/rho
                         ! Compute effective radius
                         if ((reff(i,j,k) <= 0._wp).and.(flux(i,k) /= 0._wp)) then
