@@ -2527,18 +2527,21 @@ contains
              p(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
           else
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=p)
+             print *,'p was mapped'
           endif
        case ('phalf')
           if (Lpoint) then
              ph(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
           else
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=ph)
+             print *,'ph was mapped'
           endif
        case ('height')
           if (Lpoint) then
              z(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
           else
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=z)
+             print *,'z was mapped'
           endif
        case ('height_half')
           if (Lpoint) then
