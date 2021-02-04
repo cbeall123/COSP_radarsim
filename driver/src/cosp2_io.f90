@@ -2459,7 +2459,7 @@ contains
        errmsg="Error in nf90_get_var, var: lat"
        call cosp_error(routine_name,errmsg,errcode=errst)
     endif
-    
+    print*,"getting all variables"
     ! Get all variables
     do vid = 1,nvars
        vdimid=0
@@ -2526,22 +2526,23 @@ contains
           if (Lpoint) then
              p(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
           else
+             print *, 'p mapped next'
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=p)
-             print *,'p was mapped'
+             print *, 'p was mapped'
           endif
        case ('phalf')
           if (Lpoint) then
              ph(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
           else
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=ph)
-             print *,'ph was mapped'
+             print *, 'ph was mapped'
           endif
        case ('height')
           if (Lpoint) then
              z(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
           else
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=z)
-             print *,'z was mapped'
+             print *, 'z was mapped'
           endif
        case ('height_half')
           if (Lpoint) then
@@ -2825,7 +2826,8 @@ contains
           stop
        endif
        if (Nk /= Mj) then
-          print *, ' -- '//trim(proname)//': Nk /= Mj (opt 2)'
+          print *, 'testing a print'//trim(proname )//' statement'
+          print *, ' -- '//trim(proname)//': Nk /= cmb Mj (opt 2)'
           stop
        endif
        do k=1,Nk
