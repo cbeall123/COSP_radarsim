@@ -596,7 +596,7 @@ contains
        
        ! Sum up precipitation rates
        allocate(ls_p_rate(nPoints,nLevels),cv_p_rate(nPoints,Nlevels))
-       print*,'use-precip loc2: ',use_precipitation_fluxes
+       !print*,'use-precip loc2: ',use_precipitation_fluxes
        if(use_precipitation_fluxes) then
           ls_p_rate(:,1:nLevels) = fl_lsrainIN + fl_lssnowIN + fl_lsgrplIN
           cv_p_rate(:,1:nLevels) = fl_ccrainIN + fl_ccsnowIN
@@ -736,17 +736,17 @@ contains
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        if (use_precipitation_fluxes) then
           ! LS rain
-          print*,'n_ax - lsrain',n_ax(I_LSRAIN)
+          !print*,'n_ax - lsrain',n_ax(I_LSRAIN)
           !print*,'fl_lsrain ', fl_lsrain
-          print*,'n_bx ',n_bx(I_LSRAIN)
-          print*,'alpha_x ',alpha_x(I_LSRAIN)
-          print*, 'c_x ', c_x(I_LSRAIN)
-          print*, 'd_x', d_x(I_LSRAIN)
-          print*, 'g_x', g_x(I_LSRAIN)
-          print*, 'gamma_3 ', gamma_3(I_LSRAIN)
-          print*, 'gamma_4 ', gamma_4(I_LSRAIN)
+          !print*,'n_bx ',n_bx(I_LSRAIN)
+          !print*,'alpha_x ',alpha_x(I_LSRAIN)
+          !print*, 'c_x ', c_x(I_LSRAIN)
+          !print*, 'd_x', d_x(I_LSRAIN)
+          !print*, 'g_x', g_x(I_LSRAIN)
+          !print*, 'gamma_3 ', gamma_3(I_LSRAIN)
+          !print*, 'gamma_4 ', gamma_4(I_LSRAIN)
           !print*, 'pressure', cospstateIN%pfull
-          print*, 'temperature ', cospstateIN%at
+          !print*, 'temperature ', cospstateIN%at
 
           call cosp_precip_mxratio(nPoints, nLevels, nColumns, cospstateIN%pfull,        &
                cospstateIN%at, frac_prec, 1._wp, n_ax(I_LSRAIN), n_bx(I_LSRAIN),         &
