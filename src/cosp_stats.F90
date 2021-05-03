@@ -102,18 +102,13 @@ SUBROUTINE COSP_CHANGE_VERTICAL_GRID(Npoints,Ncolumns,Nlevels,zfull,zhalf,y,Ngle
      oldgrid_top(Nlevels) = zfull(i,Nlevels) +  zfull(i,Nlevels) - zhalf(i,Nlevels) ! Top level symmetric
      l = 0 ! Index of level in the old grid
      Nglevels2 = Nglevels - 1
-     !print*, 'Nglevels2: ',Nglevels2
      ! Loop over levels in the new grid
-     do k = 1,Nglevels
-       !print*, 'level: ',k
+     do k = 1,Nglevels2
        Nw = 0 ! Number of weigths
        wt = 0._wp ! Sum of weights
        ! Loop over levels in the old grid and accumulate total for weighted average
-       do l = 1,Nglevels
-       !do	
-         !l = k
-	 !l = l+1 
-	 !print*, 'l level index: ',l
+       do
+         l = l + 1
          w = 0.0 ! Initialise weight to 0
          ! Distances between edges of both grids
          dbb = oldgrid_bot(l) - newgrid_bot(k)
