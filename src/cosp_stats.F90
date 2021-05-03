@@ -87,7 +87,6 @@ SUBROUTINE COSP_CHANGE_VERTICAL_GRID(Npoints,Ncolumns,Nlevels,zfull,zhalf,y,Ngle
    real(wp) :: wt  ! Sum of weights
    real(wp),dimension(Nlevels) :: oldgrid_bot,oldgrid_top ! Lower and upper boundaries of model grid
    real(wp) :: yp ! Local copy of y at a particular point.
-   integer :: Nglevels2 !decreasing index by 1 - CB
               ! This allows for change of units.
 
    lunits=.false.
@@ -101,9 +100,8 @@ SUBROUTINE COSP_CHANGE_VERTICAL_GRID(Npoints,Ncolumns,Nlevels,zfull,zhalf,y,Ngle
      oldgrid_top(1:Nlevels-1) = oldgrid_bot(2:Nlevels)
      oldgrid_top(Nlevels) = zfull(i,Nlevels) +  zfull(i,Nlevels) - zhalf(i,Nlevels) ! Top level symmetric
      l = 0 ! Index of level in the old grid
-     Nglevels2 = Nglevels - 1
      ! Loop over levels in the new grid
-     do k = 1,Nglevels2
+     do k = 1,(Nglevels-1)
        Nw = 0 ! Number of weigths
        wt = 0._wp ! Sum of weights
        ! Loop over levels in the old grid and accumulate total for weighted average
