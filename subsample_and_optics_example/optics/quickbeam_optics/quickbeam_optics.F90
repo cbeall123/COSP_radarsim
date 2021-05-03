@@ -147,7 +147,7 @@ contains
           ! Determine if hydrometeor(s) present in volume
           hydro = .false.
           do j=1,rcfg%nhclass
-             if ((hm_matrix(pr,k,j) > 1E-12) .and. (sd%dtype(j) > 0)) then
+             if ((hm_matrix(pr,k,j) > 1E-18) .and. (sd%dtype(j) > 0)) then
                 hydro = .true.
                 exit
              endif
