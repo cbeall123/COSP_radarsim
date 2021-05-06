@@ -867,6 +867,8 @@ contains
        fracPrecipIce(:,:,:) = 0._wp
 
        do k=1,nColumns
+       !do k=1,2
+          !print*,'mr_hydro(:,k,:,1):',mr_hydro(:,2,:,1)
           call quickbeam_optics(sd, rcfg_cloudsat, nPoints, nLevels, R_UNDEF,  &
                mr_hydro(:,k,:,1:nHydro)*1000._wp, Reff(:,k,:,1:nHydro)*1.e6_wp,&
                Np(:,k,:,1:nHydro), cospstateIN%pfull, cospstateIN%at,          &

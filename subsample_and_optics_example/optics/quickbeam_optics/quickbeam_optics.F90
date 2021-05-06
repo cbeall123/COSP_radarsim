@@ -142,24 +142,36 @@ contains
     kr_vol   = 0._wp
     Nic      = 0._wp
 
+
     do k=1,ngate       ! Loop over each profile (nprof)
        do pr=1,nprof
           ! Determine if hydrometeor(s) present in volume
           hydro = .false.
           do j=1,rcfg%nhclass
+	  !do j=1,1 !only do this test for stratiform liq cb
+	     !print*,'sd%dtype(j) value:',sd%dtype(j)
+	     !print*,'sdtype at level:',k
+	     !print*,'hm_matrix(pr,k,j) > 1E-18:',(hm_matrix(pr,k,j) > 1E-18)
+	     !print*,'at level:',k
+	     !print*,'hm_matrix(pr,k,j):',hm_matrix(pr,k,j)
              if ((hm_matrix(pr,k,j) > 1E-18) .and. (sd%dtype(j) > 0)) then
                 hydro = .true.
+		!print*,'hydro set to true at level:',k
+		!print*,'also true at class index:',j
                 exit
              endif
           enddo
 
           t_kelvin = t_matrix(pr,k)
           ! If there is hydrometeor in the volume
+	  !print*,'hydro status:',hydro
+	  !print*,'level:',k
           if (hydro) then
              rho_a = (p_matrix(pr,k))/(287._wp*(t_kelvin)) !units kg m^-3
              
              ! Loop over hydrometeor type
-             do tp=1,rcfg%nhclass
+             !do tp=1,rcfg%nhclass
+	     do tp=1,1 !Loop over stratiform liquid only
                 Re_internal = re_matrix(pr,k,tp)
 
                 if (hm_matrix(pr,k,tp) <= 1E-12) cycle
@@ -172,7 +184,8 @@ contains
                 else
                    itt = infind(mt_tti,t_kelvin) 
                 endif
-                
+                !print*,'hydro status in do tp=1 loop:',hydro
+		!print*,'at level:',k
                 ! Compute effective radius from number concentration and distribution parameters
                 if (Re_internal .eq. 0) then
                    call calc_Re(hm_matrix(pr,k,tp),Np_matrix(pr,k,tp),rho_a, &
@@ -220,6 +233,8 @@ contains
                 
                 ! Use Ze_scaled, Zr_scaled, and kr_scaled ... if know them
                 ! if not we will calculate Ze, Zr, and Kr from the distribution parameters
+		 !print*,'rcfg condition:',rcfg%Z_scale_flag(tp,itt,iRe_type)
+		 !print*,'at level:',k
 !                if( rcfg%Z_scale_flag(tp,itt,iRe_type) .and. .not. DO_LUT_TEST)  then
 !                   ! can use z scaling
 !                   scale_factor=rho_a*hm_matrix(pr,k,tp)
@@ -241,6 +256,7 @@ contains
                       Di = D
                       Ni = 0._wp
                    end select
+		   !print*,'dsd called at level:',k
                    call dsd(hm_matrix(pr,k,tp),re_internal,Np_matrix(pr,k,tp), &
                         Di,Ni,ns,sd%dtype(tp),rho_a,t_kelvin, &
                         sd%dmin(tp),sd%dmax(tp),sd%apm(tp),sd%bpm(tp), &
@@ -304,7 +320,12 @@ contains
                    endif
 		   
 		   ! Adding path integral of DSD here to calculate Nic, hydrometeor number concentration
-		    Nic(pr,k,tp) = path_integral(Ni,Di,1,ns-1)/rho_a*1.E6_wp	
+		    !print*,'Ni:',Ni
+		    !print*,'Di:',Di
+		    !Nic(pr,k,tp) = path_integral(Ni,Di,1,ns-1)/rho_a*1.E6_wp	
+		    !print*,'pr:',pr
+		    !print*,'lev:',k
+		    !print*,'tp:',tp
 
                    ! Clean up space
                    deallocate(Di,Ni,rhoi,xxa,Deq)
@@ -342,6 +363,38 @@ contains
                       rcfg%Z_scale_added_flag(tp,itt,iRe_type)=.true.
                    endif
                 endif
+		
+		! Adding call to dsd here so that Nic is calculated everywhere hydro=T, cmb
+		!print*,'dsd called at level:',k
+                ! Create a discrete distribution of hydrometeors within volume
+                select case(sd%dtype(tp))
+                case(4)
+                   ns = 1
+                   allocate(Di(ns),Ni(ns),rhoi(ns),xxa(ns),Deq(ns))
+                   Di = sd%p1(tp)
+                   Ni = 0._wp
+                case default
+                   ns = nd   ! constant defined in simulator/quickbeam.f90
+                   allocate(Di(ns),Ni(ns),rhoi(ns),xxa(ns),Deq(ns))
+                   Di = D
+                   Ni = 0._wp
+                end select
+
+                call dsd(hm_matrix(pr,k,tp),re_internal,Np_matrix(pr,k,tp), &
+		     Di,Ni,ns,sd%dtype(tp),rho_a,t_kelvin, &
+                     sd%dmin(tp),sd%dmax(tp),sd%apm(tp),sd%bpm(tp), &
+		     sd%rho(tp),sd%p1(tp),sd%p2(tp),sd%p3(tp))
+		! Adding path integral of DSD here to calculate Nic, hydrometeor number concentration
+		!print*,'Ni:',Ni
+		!print*,'Di:',Di
+		Nic(pr,k,tp) = path_integral(Ni,Di,1,ns-1)/rho_a*1.E6_wp	
+		!print*,'pr:',pr
+		!print*,'lev:',k
+		!print*,'tp:',tp
+		     
+                ! Clean up space
+                deallocate(Di,Ni,rhoi,xxa,Deq)
+
              enddo   ! end loop of tp (hydrometeor type)
           endif
        enddo
