@@ -37,7 +37,8 @@ contains
     ! ---------------------------------------------------------------------------------------
     ! Create output file.
     ! ---------------------------------------------------------------------------------------
-    status = nf90_create(path=trim(outFileName),cmode = nf90_clobber,ncid=fileID)
+    !status = nf90_create(path=trim(outFileName),cmode = nf90_clobber,ncid=fileID)
+    status = nf90_create(path=trim(outFileName),cmode = nf90_netcdf4,ncid=fileID)
     if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
 
     ! ---------------------------------------------------------------------------------------
@@ -2343,7 +2344,7 @@ contains
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! SUBROUTINE nc_read_input_file
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  SUBROUTINE NC_READ_INPUT_FILE(fname,Npnts,Nl,Nhydro,lon,lat,p,ph,z,zh,T,qv,rh,tca,cca, &
+  SUBROUTINE NC_READ_INPUT_FILE(fname,Npnts,Nl,Nhydro,lon,lat,p,ph,z,zh,T,qv,rh,tca,cca,alst,aist, &
                                 mr_lsliq,mr_lsice,mr_ccliq,mr_ccice,fl_lsrain,fl_lssnow, &
                                 fl_lsgrpl,fl_ccrain,fl_ccsnow,Reff,dtau_s,dtau_c,dem_s,  &
                                 dem_c,skt,landmask,mr_ozone,u_wind,v_wind,sunlit,        &
@@ -2353,7 +2354,7 @@ contains
     character(len=512),intent(in) :: fname ! File name
     integer,intent(in) :: Npnts,Nl,Nhydro
     real(wp),dimension(Npnts),intent(out) :: lon,lat
-    real(wp),dimension(Npnts,Nl),target,intent(out) :: p,ph,z,zh,T,qv,rh,tca,cca, &
+    real(wp),dimension(Npnts,Nl),target,intent(out) :: p,ph,z,zh,T,qv,rh,tca,cca,alst,aist &
          mr_lsliq,mr_lsice,mr_ccliq,mr_ccice,fl_lsrain,fl_lssnow,fl_lsgrpl, &
          fl_ccrain,fl_ccsnow,dtau_s,dtau_c,dem_s,dem_c,mr_ozone
     real(wp),dimension(Npnts,Nl,Nhydro),intent(out) :: Reff
@@ -2459,7 +2460,7 @@ contains
        errmsg="Error in nf90_get_var, var: lat"
        call cosp_error(routine_name,errmsg,errcode=errst)
     endif
-    print*,"getting all variables"
+
     ! Get all variables
     do vid = 1,nvars
        vdimid=0
@@ -2582,6 +2583,20 @@ contains
              call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=cca)
           endif
           cca = cca
+       case ('alst')
+          if (Lpoint) then
+             alst(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
+          else
+             call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=alst)
+          endif
+          alst = alst
+       case ('aist')
+          if (Lpoint) then
+             aist(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
+          else
+             call map_ll_to_point(Na,Nb,Npoints,x3=x3,y2=aist)
+          endif
+          aist = aist
        case ('mr_lsliq')
           if (Lpoint) then
              mr_lsliq(1:Npoints,:) = x2(1:Npoints,1:Nlevels)
@@ -2826,8 +2841,7 @@ contains
           stop
        endif
        if (Nk /= Mj) then
-          print *, 'testing a print'//trim(proname )//' statement'
-          print *, ' -- '//trim(proname)//': Nk /= cmb Mj (opt 2)'
+          print *, ' -- '//trim(proname)//': Nk /= Mj (opt 2)'
           stop
        endif
        do k=1,Nk

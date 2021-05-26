@@ -99,6 +99,8 @@ program cosp2_test
        rh,        & ! Relative humidity (1)
        tca,       & ! Total cloud fraction (1)
        cca,       & ! Convective cloud fraction (1) 
+       alst,      & ! Stratiform liquid cloud fraction (1)
+       aist,      & ! Stratiform ice cloud fraction (1)
        mr_lsliq,  & ! Mass mixing ratio for stratiform cloud liquid (kg/kg)
        mr_lsice,  & ! Mass mixing ratio for stratiform cloud ice (kg/kg)
        mr_ccliq,  & ! Mass mixing ratio for convective cloud liquid (kg/kg)
@@ -307,7 +309,8 @@ program cosp2_test
   allocate(lon(Npoints),lat(Npoints),p(Npoints,Nlevels),ph(Npoints,Nlevels),             &
            zlev(Npoints,Nlevels),zlev_half(Npoints,Nlevels),T(Npoints,Nlevels),          &
            sh(Npoints,Nlevels),rh(Npoints,Nlevels),tca(Npoints,Nlevels),                 &
-           cca(Npoints,Nlevels),mr_lsliq(Npoints,Nlevels),mr_lsice(Npoints,Nlevels),     &
+           cca(Npoints,Nlevels),alst(Npoints,Nlevels),aist(Npoints,Nlevels),             &
+           mr_lsliq(Npoints,Nlevels),mr_lsice(Npoints,Nlevels),                          &
            mr_ccliq(Npoints,Nlevels),mr_ccice(Npoints,Nlevels),                          &
            fl_lsrain(Npoints,Nlevels),fl_lssnow(Npoints,Nlevels),                        &
            fl_lsgrpl(Npoints,Nlevels),fl_ccrain(Npoints,Nlevels),                        &
@@ -319,7 +322,7 @@ program cosp2_test
 
   fileIN = trim(dinput)//trim(finput)
   call nc_read_input_file(fileIN,Npoints,Nlevels,N_HYDRO,lon,lat,p,ph,zlev,zlev_half,    &
-                          T,sh,rh,tca,cca,mr_lsliq,mr_lsice,mr_ccliq,mr_ccice,fl_lsrain, &
+                          T,sh,rh,tca,cca,alst,aist,mr_lsliq,mr_lsice,mr_ccliq,mr_ccice,fl_lsrain, &
                           fl_lssnow,fl_lsgrpl,fl_ccrain,fl_ccsnow,Reff,dtau_s,dtau_c,    &
                           dem_s,dem_c,skt,landmask,mr_ozone,u_wind,v_wind,sunlit,        &
                           emsfc_lw,geomode,Nlon,Nlat,surfelev)
@@ -503,6 +506,7 @@ program cosp2_test
           dem_c(start_idx:end_idx,nLevels:1:-1),dem_s(start_idx:end_idx,nLevels:1:-1),         &
           cospstateIN,cospIN)
      print*, 'use-precip: ',use_precipitation_fluxes
+     !print*, 'mr_hydro after subsample call: ', cospIN%mr_hydroOUT(99,3,:,1)
      call cpu_time(driver_time(6))
     
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -521,7 +525,7 @@ program cosp2_test
   print*,'Time to compute optics:   ',driver_time(6)-driver_time(4)
   print*,'Time to run COSP:         ',driver_time(7)-driver_time(6)
   print*,'Total time:               ',driver_time(7)-driver_time(1)
-
+  !print*,'cospOUT%mr_hydroOUT after COSP_SIMULATOR call: ',cospOUT%mr_hydroOUT(99,3,:,1)
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   ! Output
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -867,8 +871,9 @@ contains
        fracPrecipIce(:,:,:) = 0._wp
 
        do k=1,nColumns
-       !do k=1,2
-          !print*,'mr_hydro(:,k,:,1):',mr_hydro(:,2,:,1)
+       !do k=1,5
+          !print*,'mr_hydro(:,k,:,1) before quickbeam_optics:',mr_hydro(:,k,:,1)
+          !print*,'subcolumn of quickbeam call: ',k
           call quickbeam_optics(sd, rcfg_cloudsat, nPoints, nLevels, R_UNDEF,  &
                mr_hydro(:,k,:,1:nHydro)*1000._wp, Reff(:,k,:,1:nHydro)*1.e6_wp,&
                Np(:,k,:,1:nHydro), cospstateIN%pfull, cospstateIN%at,          &
