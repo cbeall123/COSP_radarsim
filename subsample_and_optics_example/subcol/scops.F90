@@ -39,7 +39,7 @@ module mod_scops
   integer,parameter :: default_overlap = 3 ! Used when invalid overlap assumption is provided.
   
 contains
-  subroutine scops(npoints,nlev,ncol,rngs,cc,conv,overlap,frac_out,ncolprint)
+  subroutine scops(npoints,nlev,ncol,rngs,cc,conv,alst,aist,overlap,frac_out,frac_outls,ncolprint)
     INTEGER :: npoints,    &    ! Number of model points in the horizontal
                nlev,       &    ! Number of model levels in column
                ncol,       &    ! Number of subcolumns
@@ -56,14 +56,20 @@ contains
          conv,       &    ! Input convective cloud cover in each model level (fraction)
                           ! NOTE:  This is the HORIZONTAL area of each
                           !        grid box covered by convective clouds
-         tca              ! Total cloud cover in each model level (fraction)
+         tca,        &    ! Total cloud cover in each model level (fraction)
                           ! with extra layer of zeroes on top
                           ! in this version this just contains the values input
                           ! from cc but with an extra level
+         alst,       &    ! Stratiform liquid cloud cover in each model level (fraction) cmb
+	 aist,       &    ! Stratiform ice cloud cover in each model level (fraction) cmb
+	 amix,       &    ! Stratiform mixed cloud cover in each model level (fraction) cmb
+	 plast,      &    ! Pure liquid stratiform cloud cover in each model level (fraction) cmb
+	 piast            ! Pure ice stratiform cloud cover in each model level (fraction) cmb
     REAL(WP),intent(inout), dimension(npoints,ncol,nlev) :: &
          frac_out         ! Boxes gridbox divided up into equivalent of BOX in 
                           ! original version, but indexed by column then row, rather than
                           ! by row then column
+         frac_outls       ! Boxes gridbox for stratiform clouds to distinguish mixed-phase vs liquid vs ice
     REAL(WP), dimension(npoints,ncol) :: &
          threshold,   &   ! pointer to position in gridbox
          maxocc,      &   ! Flag for max overlapped conv cld
@@ -71,7 +77,9 @@ contains
          boxpos,      &   ! ordered pointer to position in gridbox
          threshold_min    ! minimum value to define range in with new threshold is chosen.
     REAL(WP), dimension(npoints) :: &
-         ran              ! vector of random numbers
+         ran,         &   ! vector of random numbers corresponding to npoints 
+    REAL(WP), dimension(ncol) :: &
+	 ranscol          ! vector of random numbers corresponding to the number of subcolumns
 
     ! Test for valid input overlap assumption
     if (overlap .ne. 1 .and. overlap .ne. 2 .and. overlap .ne. 3) then
@@ -85,8 +93,9 @@ contains
     ! Initialize working variables
     ! #######################################################################
     
-    ! Initialize frac_out to zero
+    ! Initialize frac_out and frac_outls to zero - cmb
     frac_out(1:npoints,1:ncol,1:nlev)=0.0     
+    frac_outls(1:npoints,1:ncol,1:nlev)=0.0     
     
     ! Assign 2d tca array using 1d input array cc
     tca(1:npoints,1:nlev) = cc(1:npoints,1:nlev)
@@ -109,6 +118,20 @@ contains
           write (6,'(8f5.2)') (tca(j,1))
        enddo
     endif
+
+    !Initialize frac_outls here and amix
+    amix(:,:) = 0.0_r8
+    plast(:,:) = 0.0_r8
+    piast(:,:) = 0.0_r8
+
+    do j=1,npoints
+       do i=1,nlev
+       	  amix(j,ilev) = min(alst(j,ilev),aist(j,ilev))
+	  plast(j,ilev) = max(alst(j,ilev)-amix(j,ilev),0)
+	  piast(j,ilev) = max(aist(j,ilev)-amix(j,ilev),0)
+       enddo
+    enddo       
+
     
     ! #######################################################################
     ! ALLOCATE CLOUD INTO BOXES, FOR NCOLUMNS, NLEVELS
@@ -208,6 +231,13 @@ contains
           
           ! Code to partition boxes into startiform and convective parts goes here
           where(threshold(1:npoints,ibox).le.conv(1:npoints,ilev) .and. conv(1:npoints,ilev).gt.0.) frac_out(1:npoints,ibox,ilev)=2
+
+	  ! Code to distinguish between stratiform liquid, stratiform ice and mixed-phase subcolumns - cmb
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. ranscol(1:npoints,ibox,ilev)=get_rng(RNGS)
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).lt.amix(1:npoints,ilev) frac_outls(1:npoints,ibox,ilev)=5
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.amix(1:npoints,ilev) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev)) frac_outls(1:npoints,ibox,ilev)=3
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + plast(1:npoints,ilev)) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev) + piast(1:npoints,ilev)) frac_outls(1:npoints,ibox,ilev)=4
+	
        ENDDO ! ibox
        
        
@@ -234,6 +264,33 @@ contains
        endif
        
     enddo ! Loop over nlev
+    
+    !Initialize frac_outls here and amix
+    !amix(:,:) = 0.0_r8
+    !plast(:,:) = 0.0_r8
+    !piast(:,:) = 0.0_r8
+
+    !do j=1,npoints
+    !   do i=1,nlev
+    !   	  amix(j,ilev) = min(alst(j,ilev),aist(j,ilev))
+    !  plast(j,ilev) = max(alst(j,ilev)-amix(j,ilev),0)
+    !  piast(j,ilev) = max(aist(j,ilev)-amix(j,ilev),0)
+    !   enddo
+    !enddo       
+
+    !do j=1,npoints
+    !   do ilev=1,nlev
+    !   	  if 
+    !   	  ranscol(1:ncol) = get_rng(RNGS)
+    !	  where(frac_out(j,1
+    !     do ibox=1,ncol
+    !  	     if (alst(j,ilev).gt.aist(j,ilev)) then
+    !   	     	where(frac_out(j,1:ncol,ilev).eq.1.) frac_outls(j,ibox,ilev)=3
+    !     else
+    !		where(frac_out(j,ibox,ilev).eq.1.) frac_outls(j,ibox,ilev)=4
+    !         endif 
+    !	  enddo
+	
     
     ! END
   end subroutine scops

@@ -270,7 +270,10 @@ program cosp2_test
   ! Stratiform and convective clouds in frac_out (scops output).
   integer, parameter :: &
        I_LSC = 1, & ! Large-scale clouds
-       I_CVC = 2    ! Convective clouds    
+       I_CVC = 2, & ! Convective clouds    
+       I_LSLIQ = 3, & !Stratiform liquid clouds, pure liquid 
+       I_LSICE = 4, & !Stratiform ice clouds, pure ice
+       I_LSMP  = 5  & !Stratiform mixed-phase
 
   ! Microphysical settings for the precipitation flux to mixing ratio conversion
   real(wp),parameter,dimension(N_HYDRO) :: &
@@ -497,6 +500,7 @@ program cosp2_test
      call subsample_and_optics(nPtsPerIt,nLevels,nColumns,N_HYDRO,overlap,                     &
           use_precipitation_fluxes,lidar_ice_type,sd,                                          &
           tca(start_idx:end_idx,Nlevels:1:-1),cca(start_idx:end_idx,Nlevels:1:-1),             &
+          alst(start_idx:end_idx,Nlevels:1:-1),aist(start_idx:end_idx,Nlevels:1:-1),           & 
           fl_lsrain(start_idx:end_idx,Nlevels:1:-1),fl_lssnow(start_idx:end_idx,Nlevels:1:-1), &
           fl_lsgrpl(start_idx:end_idx,Nlevels:1:-1),fl_ccrain(start_idx:end_idx,Nlevels:1:-1), &
           fl_ccsnow(start_idx:end_idx,Nlevels:1:-1),mr_lsliq(start_idx:end_idx,Nlevels:1:-1),  &
@@ -546,12 +550,12 @@ contains
   ! SUBROUTINE subsample_and_optics
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
   subroutine subsample_and_optics(nPoints, nLevels, nColumns, nHydro, overlap,              &
-       use_precipitation_fluxes, lidar_ice_type, sd, tca, cca, fl_lsrainIN, fl_lssnowIN,    &
+       use_precipitation_fluxes, lidar_ice_type, sd, tca, cca, alst, aist, fl_lsrainIN, fl_lssnowIN,    &
        fl_lsgrplIN, fl_ccrainIN, fl_ccsnowIN, mr_lsliq, mr_lsice, mr_ccliq, mr_ccice,       &
        reffIN, dtau_c, dtau_s, dem_c, dem_s, cospstateIN, cospIN)
     ! Inputs
     integer,intent(in) :: nPoints, nLevels, nColumns, nHydro, overlap, lidar_ice_type
-    real(wp),intent(in),dimension(nPoints,nLevels) :: tca,cca,mr_lsliq,mr_lsice,mr_ccliq,   &
+    real(wp),intent(in),dimension(nPoints,nLevels) :: tca,cca,alst,aist,mr_lsliq,mr_lsice,mr_ccliq,   &
          mr_ccice,dtau_c,dtau_s,dem_c,dem_s,fl_lsrainIN,fl_lssnowIN,fl_lsgrplIN,fl_ccrainIN,&
          fl_ccsnowIN
     real(wp),intent(in),dimension(nPoints,nLevels,nHydro) :: reffIN
@@ -570,14 +574,14 @@ contains
     integer :: i,j,k
     real(wp) :: zstep
     real(wp),dimension(:,:), allocatable :: &
-         ls_p_rate, cv_p_rate, frac_ls, frac_cv, prec_ls, prec_cv,g_vol
+         ls_p_rate, cv_p_rate, frac_ls, frac_lsliq, frac_lsice, frac_cv, prec_ls, prec_cv,g_vol
     real(wp),dimension(:,:,:),  allocatable :: &
          frac_prec, MODIS_cloudWater, MODIS_cloudIce, fracPrecipIce, fracPrecipIce_statGrid,&
          MODIS_watersize,MODIS_iceSize, MODIS_opticalThicknessLiq,MODIS_opticalThicknessIce
     real(wp),dimension(:,:,:,:),allocatable :: &
          Reff, Np, mr_hydro
     real(wp),dimension(nPoints,nLevels) :: &
-         column_frac_out, column_prec_out, fl_lsrain, fl_lssnow, fl_lsgrpl, fl_ccrain, fl_ccsnow
+         column_frac_out, column_frac_outls, column_prec_out, fl_lsrain, fl_lssnow, fl_lsgrpl, fl_ccrain, fl_ccsnow
     real(wp),dimension(nPoints,nColumns,Nlvgrid_local) :: tempOut
     logical :: cmpGases=.true.
 
@@ -595,7 +599,7 @@ contains
        call init_rng(rngs, seed)
       
        ! Call scops
-       call scops(NPoints,Nlevels,Ncolumns,rngs,tca,cca,overlap,cospIN%frac_out,0)
+       call scops(NPoints,Nlevels,Ncolumns,rngs,tca,cca,alst,aist,overlap,cospIN%frac_out,cospIN%frac_outls,0)
        deallocate(seed,rngs)
        
        ! Sum up precipitation rates
@@ -618,11 +622,14 @@ contains
        ! Compute fraction in each gridbox for precipitation  and cloud type.
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        ! Allocate
-       allocate(frac_ls(nPoints,nLevels),prec_ls(nPoints,nLevels),                       &
-                frac_cv(nPoints,nLevels),prec_cv(nPoints,nLevels))
+       allocate(frac_ls(nPoints,nLevels),frac_lsliq(nPoints,nLevels),                      &
+               frac_lsice(nPoints,nLevels),prec_ls(nPoints,nLevels),                       &
+               frac_cv(nPoints,nLevels),prec_cv(nPoints,nLevels))
        
        ! Initialize
        frac_ls(1:nPoints,1:nLevels) = 0._wp
+       frac_lsliq(1:nPoints,1:nLevels) = 0._wp
+       frac_lsice(1:nPoints,1:nLevels) = 0._wp
        prec_ls(1:nPoints,1:nLevels) = 0._wp
        frac_cv(1:nPoints,1:nLevels) = 0._wp
        prec_cv(1:nPoints,1:nLevels) = 0._wp
@@ -631,6 +638,10 @@ contains
              do i=1,nColumns
                 if (cospIN%frac_out(j,i,k)  .eq. 1)  frac_ls(j,k) = frac_ls(j,k)+1._wp
                 if (cospIN%frac_out(j,i,k)  .eq. 2)  frac_cv(j,k) = frac_cv(j,k)+1._wp
+                if (cospIN%frac_outls(j,i,k)  .eq. 3)  frac_lsliq(j,k) = frac_lsliq(j,k)+1._wp
+                if (cospIN%frac_outls(j,i,k)  .eq. 4)  frac_lsice(j,k) = frac_lsice(j,k)+1._wp
+                if (cospIN%frac_outls(j,i,k)  .eq. 5)  frac_lsliq(j,k) = frac_lsliq(j,k)+1._wp
+                if (cospIN%frac_outls(j,i,k)  .eq. 5)  frac_lsice(j,k) = frac_lsice(j,k)+1._wp
                 if (frac_prec(j,i,k) .eq. 1)  prec_ls(j,k) = prec_ls(j,k)+1._wp
                 if (frac_prec(j,i,k) .eq. 2)  prec_cv(j,k) = prec_cv(j,k)+1._wp
                 if (frac_prec(j,i,k) .eq. 3)  prec_cv(j,k) = prec_cv(j,k)+1._wp
@@ -638,6 +649,8 @@ contains
              enddo
              frac_ls(j,k)=frac_ls(j,k)/nColumns
              frac_cv(j,k)=frac_cv(j,k)/nColumns
+             frac_lsliq(j,k)=frac_lsliq(j,k)/nColumns
+             frac_lsice(j,k)=frac_lsice(j,k)/nColumns
              prec_ls(j,k)=prec_ls(j,k)/nColumns
              prec_cv(j,k)=prec_cv(j,k)/nColumns
           enddo
@@ -658,12 +671,19 @@ contains
        do k=1,nColumns
           ! Subcolumn cloud fraction
           column_frac_out = cospIN%frac_out(:,k,:)
+          column_frac_outls = cospIN%frac_outls(:,k,:)
                
           ! LS clouds
-          where (column_frac_out == I_LSC)
+          where (column_frac_outls == I_LSLIQ)
              mr_hydro(:,k,:,I_LSCLIQ) = mr_lsliq
-             mr_hydro(:,k,:,I_LSCICE) = mr_lsice
              Reff(:,k,:,I_LSCLIQ)     = ReffIN(:,:,I_LSCLIQ)
+          where (column_frac_outls == I_LSICE)
+             mr_hydro(:,k,:,I_LSCICE) = mr_lsice
+             Reff(:,k,:,I_LSCICE)     = ReffIN(:,:,I_LSCICE)
+          where (column_frac_outls == I_LSMP)
+             mr_hydro(:,k,:,I_LSCLIQ) = mr_lsliq
+             Reff(:,k,:,I_LSCLIQ)     = ReffIN(:,:,I_LSCLIQ)
+             mr_hydro(:,k,:,I_LSCICE) = mr_lsice
              Reff(:,k,:,I_LSCICE)     = ReffIN(:,:,I_LSCICE)
           ! CONV clouds   
           elsewhere (column_frac_out == I_CVC)
@@ -701,9 +721,15 @@ contains
        do k=1,nLevels
           do j=1,nPoints
              ! In-cloud mixing ratios.
-             if (frac_ls(j,k) .ne. 0.) then
-                mr_hydro(j,:,k,I_LSCLIQ) = mr_hydro(j,:,k,I_LSCLIQ)/frac_ls(j,k)
-                mr_hydro(j,:,k,I_LSCICE) = mr_hydro(j,:,k,I_LSCICE)/frac_ls(j,k)
+             !if (frac_ls(j,k) .ne. 0.) then
+             !   mr_hydro(j,:,k,I_LSCLIQ) = mr_hydro(j,:,k,I_LSCLIQ)/frac_ls(j,k)
+             !   mr_hydro(j,:,k,I_LSCICE) = mr_hydro(j,:,k,I_LSCICE)/frac_ls(j,k)
+             !endif
+             if (frac_lsliq(j,k) .ne. 0.) then
+                 mr_hydro(j,:,k,I_LSCLIQ) = mr_hydro(j,:,k,I_LSCLIQ)/frac_lsliq(j,k)
+             endif
+             if (frac_lsice(j,k) .ne. 0.) then
+                mr_hydro(j,:,k,I_LSCICE) = mr_hydro(j,:,k,I_LSCICE)/frac_lsice(j,k)
              endif
              if (frac_cv(j,k) .ne. 0.) then
                 mr_hydro(j,:,k,I_CVCLIQ) = mr_hydro(j,:,k,I_CVCLIQ)/frac_cv(j,k)
@@ -733,7 +759,7 @@ contains
              endif
           enddo
        enddo
-       deallocate(frac_ls,prec_ls,frac_cv,prec_cv)
+       deallocate(frac_ls,frac_lsliq,frac_lsice,prec_ls,frac_cv,prec_cv)
 
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        ! Convert precipitation fluxes to mixing ratios
