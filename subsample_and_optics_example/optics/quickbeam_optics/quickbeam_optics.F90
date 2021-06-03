@@ -145,18 +145,20 @@ contains
 
     do k=1,ngate       ! Loop over each profile (nprof)
        do pr=1,nprof
+       !do pr=99,101
           ! Determine if hydrometeor(s) present in volume
           hydro = .false.
           do j=1,rcfg%nhclass
 	  !do j=1,1 !only do this test for stratiform liq cb
 	     !print*,'sd%dtype(j) value:',sd%dtype(j)
 	     !print*,'sdtype at level:',k
-	     !print*,'hm_matrix(pr,k,j) > 1E-18:',(hm_matrix(pr,k,j) > 1E-18)
+	     !print*,'hm_matrix(pr,k,j) > 1E-15:',(hm_matrix(pr,k,j) > 1E-15)
 	     !print*,'at level:',k
 	     !print*,'hm_matrix(pr,k,j):',hm_matrix(pr,k,j)
-             if ((hm_matrix(pr,k,j) > 1E-18) .and. (sd%dtype(j) > 0)) then
+             if ((hm_matrix(pr,k,j) > 1E-15) .and. (sd%dtype(j) > 0)) then
                 hydro = .true.
 		!print*,'hydro set to true at level:',k
+		!print*,'location: ',pr
 		!print*,'also true at class index:',j
                 exit
              endif
@@ -170,12 +172,14 @@ contains
              rho_a = (p_matrix(pr,k))/(287._wp*(t_kelvin)) !units kg m^-3
              
              ! Loop over hydrometeor type
-             !do tp=1,rcfg%nhclass
-	     do tp=1,1 !Loop over stratiform liquid only
+             do tp=1,rcfg%nhclass
+	     !do tp=1,1 !Loop over stratiform liquid only
                 Re_internal = re_matrix(pr,k,tp)
 
-                if (hm_matrix(pr,k,tp) <= 1E-12) cycle
-                
+                !print*,'hm_matrix cycle conditional status: ', hm_matrix(pr,k,tp)
+                !if (hm_matrix(pr,k,tp) <= 1E-12) cycle
+                if (hm_matrix(pr,k,tp) <= 1E-15) cycle !Updating to align with EAM hydrometeor threshold qsmall
+
                 ! Index into temperature dimension of scaling tables
                 !   These tables have regular steps -- exploit this and abandon infind
                 phase = sd%phase(tp)
