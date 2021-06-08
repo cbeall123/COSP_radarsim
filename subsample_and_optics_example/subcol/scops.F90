@@ -66,7 +66,7 @@ contains
 	 plast,      &    ! Pure liquid stratiform cloud cover in each model level (fraction) cmb
 	 piast            ! Pure ice stratiform cloud cover in each model level (fraction) cmb
     REAL(WP),intent(inout), dimension(npoints,ncol,nlev) :: &
-         frac_out         ! Boxes gridbox divided up into equivalent of BOX in 
+         frac_out,   &    ! Boxes gridbox divided up into equivalent of BOX in 
                           ! original version, but indexed by column then row, rather than
                           ! by row then column
          frac_outls       ! Boxes gridbox for stratiform clouds to distinguish mixed-phase vs liquid vs ice
@@ -77,8 +77,8 @@ contains
          boxpos,      &   ! ordered pointer to position in gridbox
          threshold_min    ! minimum value to define range in with new threshold is chosen.
     REAL(WP), dimension(npoints) :: &
-         ran,         &   ! vector of random numbers corresponding to npoints 
-    REAL(WP), dimension(ncol) :: &
+         ran              ! vector of random numbers corresponding to npoints 
+    REAL(WP), dimension(npoints,ncol,nlev) :: &
 	 ranscol          ! vector of random numbers corresponding to the number of subcolumns
 
     ! Test for valid input overlap assumption
@@ -120,18 +120,22 @@ contains
     endif
 
     !Initialize frac_outls here and amix
-    amix(:,:) = 0.0_r8
-    plast(:,:) = 0.0_r8
-    piast(:,:) = 0.0_r8
+    amix(:,:) = 0.0
+    plast(:,:) = 0.0
+    piast(:,:) = 0.0
 
     do j=1,npoints
-       do i=1,nlev
+       do ilev=1,nlev
        	  amix(j,ilev) = min(alst(j,ilev),aist(j,ilev))
-	  plast(j,ilev) = max(alst(j,ilev)-amix(j,ilev),0)
-	  piast(j,ilev) = max(aist(j,ilev)-amix(j,ilev),0)
+	  plast(j,ilev) = max(alst(j,ilev)-amix(j,ilev),0.0)
+	  piast(j,ilev) = max(aist(j,ilev)-amix(j,ilev),0.0)
        enddo
     enddo       
-
+    print*,'amix lev 50-60:',amix(1,50:60)
+    print*,'aist:',aist(1,50:60)
+    print*,'piast:',piast(1,50:60)
+    print*,'alst:',alst(1,50:60)
+    print*,'plast:',plast(1,50:60)
     
     ! #######################################################################
     ! ALLOCATE CLOUD INTO BOXES, FOR NCOLUMNS, NLEVELS
@@ -233,10 +237,16 @@ contains
           where(threshold(1:npoints,ibox).le.conv(1:npoints,ilev) .and. conv(1:npoints,ilev).gt.0.) frac_out(1:npoints,ibox,ilev)=2
 
 	  ! Code to distinguish between stratiform liquid, stratiform ice and mixed-phase subcolumns - cmb
-	  where(frac_out(1:npoints,ibox,ilev).eq.1. ranscol(1:npoints,ibox,ilev)=get_rng(RNGS)
-	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).lt.amix(1:npoints,ilev) frac_outls(1:npoints,ibox,ilev)=5
-	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.amix(1:npoints,ilev) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev)) frac_outls(1:npoints,ibox,ilev)=3
-	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + plast(1:npoints,ilev)) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev) + piast(1:npoints,ilev)) frac_outls(1:npoints,ibox,ilev)=4
+	  where(frac_out(1:npoints,ibox,ilev).eq.1.) ranscol(1:npoints,ibox,ilev)=get_rng(RNGS)
+	  ranscol(1:npoints,ibox,ilev)=ranscol(1:npoints,ibox,ilev)*(amix(1:npoints,ilev)+plast(1:npoints,ilev)+ &
+	  piast(1:npoints,ilev)) !scaling by the total stratiform cloud fraction since we have selected these subcols already
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).lt.amix(1:npoints,ilev)) &
+	  frac_outls(1:npoints,ibox,ilev)=5
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.amix(1:npoints,ilev) .and. &
+	  ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev))) frac_outls(1:npoints,ibox,ilev)=3
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + &
+	  plast(1:npoints,ilev)) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev) &
+	  + piast(1:npoints,ilev))) frac_outls(1:npoints,ibox,ilev)=4
 	
        ENDDO ! ibox
        
@@ -264,6 +274,22 @@ contains
        endif
        
     enddo ! Loop over nlev
+    !print*, 'amix level 49:', amix(1,49)
+    !print*, 'plast level 49:', plast(1,49)
+    !print*, 'piast level 49:', piast(1,49)
+    print*, 'ranscol level 45:',ranscol(1,:,45)
+    print*, 'ranscol level 54:',ranscol(1,:,54)
+    print*, 'ranscol level 60:',ranscol(1,:,60)
+    print*, 'frac_outls lev 45:',frac_outls(1,:,45)
+    print*, 'frac_outls lev 54:',frac_outls(1,:,54)
+    print*, 'frac_outls lev 60:', frac_outls(1,:,60)
+    !print*, 'frac_outls lev 61:', frac_outls(1,:,61)
+    !print*, 'frac_outls lev 62:', frac_outls(1,:,62)
+    !print*, 'frac_outls lev 63:', frac_outls(1,:,63)
+    !print*, 'frac_outls lev 49:', frac_outls(1,:,49)
+    print*, 'frac_out lev 45:', frac_out(1,:,45)
+    print*, 'frac_out lev 54:', frac_out(1,:,54)
+    print*, 'frac_out lev 60:', frac_out(1,:,60)
     
     !Initialize frac_outls here and amix
     !amix(:,:) = 0.0_r8

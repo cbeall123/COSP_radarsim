@@ -273,7 +273,7 @@ program cosp2_test
        I_CVC = 2, & ! Convective clouds    
        I_LSLIQ = 3, & !Stratiform liquid clouds, pure liquid 
        I_LSICE = 4, & !Stratiform ice clouds, pure ice
-       I_LSMP  = 5  & !Stratiform mixed-phase
+       I_LSMP  = 5    !Stratiform mixed-phase
 
   ! Microphysical settings for the precipitation flux to mixing ratio conversion
   real(wp),parameter,dimension(N_HYDRO) :: &
@@ -494,6 +494,7 @@ program cosp2_test
      allocate(cospIN%mr_hydroOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
      allocate(cospIN%ReffOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
      allocate(cospIN%NpOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
+     !allocate(cospIN%frac_outls(nPtsPerIt,nColumns,nLevels))
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      ! Generate subcolumns and compute optical inputs.
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -655,7 +656,8 @@ contains
              prec_cv(j,k)=prec_cv(j,k)/nColumns
           enddo
        enddo       
-
+       print*, 'frac_lsliq levs 50-60:', frac_lsliq(1,50:60)
+       print*, 'frac_lsice levs 50-60:', frac_lsice(1,50:60)
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        ! Assign gridmean mixing-ratios (mr_XXXXX), effective radius (ReffIN) and number
        ! concentration (not defined) to appropriate sub-column. Here we are using scops. 
@@ -677,10 +679,10 @@ contains
           where (column_frac_outls == I_LSLIQ)
              mr_hydro(:,k,:,I_LSCLIQ) = mr_lsliq
              Reff(:,k,:,I_LSCLIQ)     = ReffIN(:,:,I_LSCLIQ)
-          where (column_frac_outls == I_LSICE)
+          elsewhere (column_frac_outls == I_LSICE)
              mr_hydro(:,k,:,I_LSCICE) = mr_lsice
              Reff(:,k,:,I_LSCICE)     = ReffIN(:,:,I_LSCICE)
-          where (column_frac_outls == I_LSMP)
+          elsewhere (column_frac_outls == I_LSMP)
              mr_hydro(:,k,:,I_LSCLIQ) = mr_lsliq
              Reff(:,k,:,I_LSCLIQ)     = ReffIN(:,:,I_LSCLIQ)
              mr_hydro(:,k,:,I_LSCICE) = mr_lsice
@@ -759,6 +761,8 @@ contains
              endif
           enddo
        enddo
+       print*,'lscliq in-cloud levs 60 :', mr_hydro(1,:,60,I_LSCLIQ)
+       print*,'lscliq in-cloud lev 54:', mr_hydro(1,:,54,I_LSCLIQ)
        deallocate(frac_ls,frac_lsliq,frac_lsice,prec_ls,frac_cv,prec_cv)
 
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1000,6 +1004,7 @@ contains
     y%Npart    = 4
     y%Nrefl    = PARASOL_NREFL
     allocate(y%frac_out(npoints,       ncolumns,nlevels))
+    allocate(y%frac_outls(npoints,     ncolumns,nlevels))
 
     if (Lmodis .or. Lmisr .or. Lisccp) then
        allocate(y%tau_067(npoints,        ncolumns,nlevels),&

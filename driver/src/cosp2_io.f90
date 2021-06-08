@@ -2354,7 +2354,7 @@ contains
     character(len=512),intent(in) :: fname ! File name
     integer,intent(in) :: Npnts,Nl,Nhydro
     real(wp),dimension(Npnts),intent(out) :: lon,lat
-    real(wp),dimension(Npnts,Nl),target,intent(out) :: p,ph,z,zh,T,qv,rh,tca,cca,alst,aist &
+    real(wp),dimension(Npnts,Nl),target,intent(out) :: p,ph,z,zh,T,qv,rh,tca,cca,alst,aist, &
          mr_lsliq,mr_lsice,mr_ccliq,mr_ccice,fl_lsrain,fl_lssnow,fl_lsgrpl, &
          fl_ccrain,fl_ccsnow,dtau_s,dtau_c,dem_s,dem_c,mr_ozone
     real(wp),dimension(Npnts,Nl,Nhydro),intent(out) :: Reff

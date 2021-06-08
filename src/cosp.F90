@@ -170,6 +170,7 @@ MODULE MOD_COSP
      real(wp),allocatable,dimension(:,:,:,:) :: mr_hydroOUT
      real(wp),allocatable,dimension(:,:,:,:) :: ReffOUT
      real(wp),allocatable,dimension(:,:,:,:) :: NpOUT
+     real(wp),allocatable,dimension(:,:,:) :: frac_outls
   end type cosp_optical_inputs
 
   ! ######################################################################################
