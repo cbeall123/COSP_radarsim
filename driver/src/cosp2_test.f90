@@ -600,7 +600,7 @@ contains
        call init_rng(rngs, seed)
       
        ! Call scops
-       call scops(NPoints,Nlevels,Ncolumns,rngs,tca,cca,alst,aist,overlap,cospIN%frac_out,cospIN%frac_outls,0)
+       call scops(NPoints,Nlevels,Ncolumns,rngs,tca,cca,alst,aist,mr_lsliq, mr_lsice,overlap,cospIN%frac_out,cospIN%frac_outls,0)
        deallocate(seed,rngs)
        
        ! Sum up precipitation rates
@@ -656,8 +656,8 @@ contains
              prec_cv(j,k)=prec_cv(j,k)/nColumns
           enddo
        enddo       
-       print*, 'frac_lsliq levs 50-60:', frac_lsliq(1,50:60)
-       print*, 'frac_lsice levs 50-60:', frac_lsice(1,50:60)
+       !print*, 'frac_lsliq levs 50-60:', frac_lsliq(1,50:60)
+       !print*, 'frac_lsice levs 50-60:', frac_lsice(1,50:60)
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
        ! Assign gridmean mixing-ratios (mr_XXXXX), effective radius (ReffIN) and number
        ! concentration (not defined) to appropriate sub-column. Here we are using scops. 
@@ -761,8 +761,16 @@ contains
              endif
           enddo
        enddo
-       print*,'lscliq in-cloud levs 60 :', mr_hydro(1,:,60,I_LSCLIQ)
-       print*,'lscliq in-cloud lev 54:', mr_hydro(1,:,54,I_LSCLIQ)
+       !print*,'lscliq in-cloud levs 44 :', mr_hydro(1,:,44,I_LSCLIQ)
+       !print*,'lscice in-cloud levs 44 :', mr_hydro(1,:,44,I_LSCICE)
+       !print*,'lscliq in-cloud levs 45 :', mr_hydro(1,:,45,I_LSCLIQ)
+       !print*,'lscice in-cloud levs 45 :', mr_hydro(1,:,45,I_LSCICE)
+       !print*,'lscliq in-cloud lev 54:', mr_hydro(1,:,54,I_LSCLIQ)
+       print*,'lscliq in-cloud levs 61 :', mr_hydro(1,:,61,I_LSCLIQ)
+       print*,'lscice in-cloud levs 61 :', mr_hydro(1,:,61,I_LSCICE)
+       print*,'lscliq in-cloud levs 62 :', mr_hydro(1,:,62,I_LSCLIQ)
+       print*,'lscice in-cloud levs 62 :', mr_hydro(1,:,62,I_LSCICE)
+       
        deallocate(frac_ls,frac_lsliq,frac_lsice,prec_ls,frac_cv,prec_cv)
 
        !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

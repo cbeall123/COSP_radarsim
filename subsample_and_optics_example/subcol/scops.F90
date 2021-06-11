@@ -39,7 +39,7 @@ module mod_scops
   integer,parameter :: default_overlap = 3 ! Used when invalid overlap assumption is provided.
   
 contains
-  subroutine scops(npoints,nlev,ncol,rngs,cc,conv,alst,aist,overlap,frac_out,frac_outls,ncolprint)
+  subroutine scops(npoints,nlev,ncol,rngs,cc,conv,alst,aist,mr_lsliq,mr_lsice,overlap,frac_out,frac_outls,ncolprint)
     INTEGER :: npoints,    &    ! Number of model points in the horizontal
                nlev,       &    ! Number of model levels in column
                ncol,       &    ! Number of subcolumns
@@ -64,7 +64,9 @@ contains
 	 aist,       &    ! Stratiform ice cloud cover in each model level (fraction) cmb
 	 amix,       &    ! Stratiform mixed cloud cover in each model level (fraction) cmb
 	 plast,      &    ! Pure liquid stratiform cloud cover in each model level (fraction) cmb
-	 piast            ! Pure ice stratiform cloud cover in each model level (fraction) cmb
+	 piast,      &    ! Pure ice stratiform cloud cover in each model level (fraction) cmb
+	 mr_lsliq,   &    ! Input stratiform liquid mixing ratio (kg/kg)
+	 mr_lsice         ! Input stratiform ice mixing ratio (kg/kg)
     REAL(WP),intent(inout), dimension(npoints,ncol,nlev) :: &
          frac_out,   &    ! Boxes gridbox divided up into equivalent of BOX in 
                           ! original version, but indexed by column then row, rather than
@@ -119,10 +121,14 @@ contains
        enddo
     endif
 
-    !Initialize frac_outls here and amix
+    !Initialiaze amix, plast, piast
     amix(:,:) = 0.0
     plast(:,:) = 0.0
     piast(:,:) = 0.0
+    
+    !Adjust alst and aist to eliminate places where cloud fraction indicates cloud but mixing ratio is < qsmall - cmb
+    where(mr_lsliq.le.1E-18) alst = 0.0
+    where(mr_lsice.le.1E-18) aist = 0.0
 
     do j=1,npoints
        do ilev=1,nlev
@@ -131,11 +137,14 @@ contains
 	  piast(j,ilev) = max(aist(j,ilev)-amix(j,ilev),0.0)
        enddo
     enddo       
-    print*,'amix lev 50-60:',amix(1,50:60)
-    print*,'aist:',aist(1,50:60)
-    print*,'piast:',piast(1,50:60)
-    print*,'alst:',alst(1,50:60)
-    print*,'plast:',plast(1,50:60)
+    
+    !Adding condition to eliminate ice or liquid stratiform when mixing ratio < qsmall from EAM 
+    where(mr_lsliq.le.1E-18 .or. mr_lsice.le.1E-18) amix = 0.0
+    print*,'amix lev 60-65:',amix(1,60:65)
+    print*,'aist:',aist(1,60:65)
+    print*,'piast:',piast(1,60:65)
+    print*,'alst:',alst(1,60:65)
+    print*,'plast:',plast(1,60:65)
     
     ! #######################################################################
     ! ALLOCATE CLOUD INTO BOXES, FOR NCOLUMNS, NLEVELS
@@ -231,22 +240,25 @@ contains
                (1-threshold_min(1:npoints,ibox))*ran(1:npoints)))
           
           ! Fill frac_out with 1's where tca is greater than the threshold
-          frac_out(1:npoints,ibox,ilev) = merge(1,0,tca(1:npoints,ilev).gt.threshold(1:npoints,ibox))
+          frac_out(1:npoints,ibox,ilev) = merge(1,0,(tca(1:npoints,ilev).gt.threshold(1:npoints,ibox) &
+	  	.and. (mr_lsliq(1:npoints,ilev)+mr_lsice(1:npoints,ilev)).gt.1E-18))
           
           ! Code to partition boxes into startiform and convective parts goes here
           where(threshold(1:npoints,ibox).le.conv(1:npoints,ilev) .and. conv(1:npoints,ilev).gt.0.) frac_out(1:npoints,ibox,ilev)=2
 
 	  ! Code to distinguish between stratiform liquid, stratiform ice and mixed-phase subcolumns - cmb
-	  where(frac_out(1:npoints,ibox,ilev).eq.1.) ranscol(1:npoints,ibox,ilev)=get_rng(RNGS)
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. (mr_lsliq(1:npoints,ilev).gt.1E-18 .or. &
+	  mr_lsice(1:npoints,ilev).gt.1E-18)) ranscol(1:npoints,ibox,ilev)=get_rng(RNGS)
 	  ranscol(1:npoints,ibox,ilev)=ranscol(1:npoints,ibox,ilev)*(amix(1:npoints,ilev)+plast(1:npoints,ilev)+ &
 	  piast(1:npoints,ilev)) !scaling by the total stratiform cloud fraction since we have selected these subcols already
-	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).lt.amix(1:npoints,ilev)) &
-	  frac_outls(1:npoints,ibox,ilev)=5
+	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).lt.amix(1:npoints,ilev) &
+	  .and. mr_lsliq(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=5
 	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.amix(1:npoints,ilev) .and. &
-	  ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev))) frac_outls(1:npoints,ibox,ilev)=3
+	  ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev)) .and. &
+	  mr_lsliq(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=3
 	  where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + &
 	  plast(1:npoints,ilev)) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev) &
-	  + piast(1:npoints,ilev))) frac_outls(1:npoints,ibox,ilev)=4
+	  + piast(1:npoints,ilev)) .and. mr_lsice(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=4
 	
        ENDDO ! ibox
        
@@ -277,19 +289,31 @@ contains
     !print*, 'amix level 49:', amix(1,49)
     !print*, 'plast level 49:', plast(1,49)
     !print*, 'piast level 49:', piast(1,49)
-    print*, 'ranscol level 45:',ranscol(1,:,45)
-    print*, 'ranscol level 54:',ranscol(1,:,54)
-    print*, 'ranscol level 60:',ranscol(1,:,60)
-    print*, 'frac_outls lev 45:',frac_outls(1,:,45)
-    print*, 'frac_outls lev 54:',frac_outls(1,:,54)
-    print*, 'frac_outls lev 60:', frac_outls(1,:,60)
-    !print*, 'frac_outls lev 61:', frac_outls(1,:,61)
-    !print*, 'frac_outls lev 62:', frac_outls(1,:,62)
+    !print*, 'ranscol level 44:',ranscol(1,:,44)
+    !print*, 'ranscol level 45:',ranscol(1,:,45)
+    !print*, 'ranscol level 60:',ranscol(1,:,60)
+    print*, 'ranscol level 61:',ranscol(1,:,61)
+    print*, 'ranscol level 62:',ranscol(1,:,62)
+    !print*, 'frac_outls lev 44:',frac_outls(1,:,44)    
+    !print*, 'frac_outls lev 45:',frac_outls(1,:,45)
+    !print*, 'frac_outls lev 60:', frac_outls(1,:,60)
+    print*, 'frac_outls lev 61:', frac_outls(1,:,61)
+    print*, 'frac_outls lev 62:', frac_outls(1,:,62)
     !print*, 'frac_outls lev 63:', frac_outls(1,:,63)
     !print*, 'frac_outls lev 49:', frac_outls(1,:,49)
-    print*, 'frac_out lev 45:', frac_out(1,:,45)
-    print*, 'frac_out lev 54:', frac_out(1,:,54)
-    print*, 'frac_out lev 60:', frac_out(1,:,60)
+    !print*, 'frac_out lev 44:', frac_out(1,:,44)
+    !print*, 'frac_out lev 45:', frac_out(1,:,45)
+    !print*, 'frac_out lev 60:', frac_out(1,:,60)
+    print*, 'frac_out lev 61:', frac_out(1,:,61)
+    print*, 'frac_out lev 62:', frac_out(1,:,62)
+    !print*, 'mr_lsliq lev 44:', mr_lsliq(1,44)
+    !print*, 'mr_lsice lev 44:', mr_lsice(1,44)
+    !print*, 'mr_lsliq lev 45:', mr_lsliq(1,45)
+    !print*, 'mr_lsice lev 45:', mr_lsice(1,45)
+    !print*, 'mr_lsliq lev 60:', mr_lsliq(1,60)
+    !print*, 'mr_lsice lev 60:', mr_lsice(1,60)
+    print*, 'mr_lsliq lev 61:', mr_lsliq(1,61)
+    print*, 'mr_lsice lev 62:', mr_lsice(1,62)
     
     !Initialize frac_outls here and amix
     !amix(:,:) = 0.0_r8
