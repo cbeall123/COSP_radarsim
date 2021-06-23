@@ -766,10 +766,10 @@ contains
        !print*,'lscliq in-cloud levs 45 :', mr_hydro(1,:,45,I_LSCLIQ)
        !print*,'lscice in-cloud levs 45 :', mr_hydro(1,:,45,I_LSCICE)
        !print*,'lscliq in-cloud lev 54:', mr_hydro(1,:,54,I_LSCLIQ)
-       print*,'lscliq in-cloud levs 61 :', mr_hydro(1,:,61,I_LSCLIQ)
-       print*,'lscice in-cloud levs 61 :', mr_hydro(1,:,61,I_LSCICE)
-       print*,'lscliq in-cloud levs 62 :', mr_hydro(1,:,62,I_LSCLIQ)
-       print*,'lscice in-cloud levs 62 :', mr_hydro(1,:,62,I_LSCICE)
+       !print*,'lscliq in-cloud levs 61 :', mr_hydro(1,:,61,I_LSCLIQ)
+       !print*,'lscice in-cloud levs 61 :', mr_hydro(1,:,61,I_LSCICE)
+       !print*,'lscliq in-cloud levs 62 :', mr_hydro(1,:,62,I_LSCLIQ)
+       !print*,'lscice in-cloud levs 62 :', mr_hydro(1,:,62,I_LSCICE)
        
        deallocate(frac_ls,frac_lsliq,frac_lsice,prec_ls,frac_cv,prec_cv)
 
