@@ -58,6 +58,7 @@ program cosp2_test
   USE mod_quickbeam_optics,only: size_distribution,hydro_class_init,quickbeam_optics,     &
                                  quickbeam_optics_init,gases
   use quickbeam,           only: radar_cfg
+  use mod_mwfs,            only: calc_mwfs
   use mod_cosp,            only: cosp_init,cosp_optical_inputs,cosp_column_inputs,        &
                                  cosp_outputs,cosp_cleanUp,cosp_simulator
   USE mod_rng,             ONLY: rng_state, init_rng
@@ -494,6 +495,11 @@ program cosp2_test
      allocate(cospIN%mr_hydroOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
      allocate(cospIN%ReffOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
      allocate(cospIN%NpOUT(nPtsPerIt,nColumns,nLevels,N_HYDRO))
+     allocate(cospIN%mwfs_lsliq(nPtsPerIt,nColumns,nLevels))
+     allocate(cospIN%mwfs_lsice(nPtsPerIt,nColumns,nLevels))
+     allocate(cospIN%mwfs_lsrain(nPtsPerIt,nColumns,nLevels))
+     allocate(cospIN%mwfs_lssnow(nPtsPerIt,nColumns,nLevels))
+
      !allocate(cospIN%frac_outls(nPtsPerIt,nColumns,nLevels))
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      ! Generate subcolumns and compute optical inputs.
@@ -918,6 +924,14 @@ contains
                cospstateIN%qv, cospIN%z_vol_cloudsat(1:nPoints,k,:),           &
                cospIN%kr_vol_cloudsat(1:nPoints,k,:), cospIN%NpOUT(1:nPoints,k,:,1:nHydro))
           
+          call calc_mwfs(nPoints,nLevels,cospstateIN%at,cospstateIN%pfull,               &
+               mr_hydro(1:nPoints,k,:,I_LSRAIN),mr_hydro(1:nPoints,k,:,I_LSSNOW),        &
+               mr_hydro(1:nPoints,k,:,I_LSCLIQ),mr_hydro(1:nPoints,k,:,I_LSCICE),        &
+               cospIN%NpOUT(1:nPoints,k,:,I_LSRAIN),cospIN%NpOUT(1:nPoints,k,:,I_LSSNOW),&
+               cospIN%NpOUT(1:nPoints,k,:,I_LSCLIQ),cospIN%NpOUT(1:nPoints,k,:,I_LSCICE),&
+               cospIN%mwfs_lsliq(1:nPoints,k,:),cospIN%mwfs_lsice(1:nPoints,k,:),        &
+               cospIN%mwfs_lsrain(1:nPoints,k,:),cospIN%mwfs_lssnow(1:nPoints,k,:))
+
           ! At each model level, what fraction of the precipitation is frozen?
           where(mr_hydro(:,k,:,I_LSRAIN) .gt. 0 .or. mr_hydro(:,k,:,I_LSSNOW) .gt. 0 .or. &
                 mr_hydro(:,k,:,I_CVRAIN) .gt. 0 .or. mr_hydro(:,k,:,I_CVSNOW) .gt. 0 .or. &
@@ -1404,6 +1418,10 @@ contains
     allocate(x%mr_hydroOUT(Npoints,Ncolumns,Nlevels,nHydro))
     allocate(x%ReffOUT(Npoints,Ncolumns,Nlevels,nHydro))
     allocate(x%NpOUT(Npoints,Ncolumns,Nlevels,nHydro))
+    allocate(x%mwfs_lsliq(Npoints,Ncolumns,Nlevels))
+    allocate(x%mwfs_lsice(Npoints,Ncolumns,Nlevels))
+    allocate(x%mwfs_lsrain(Npoints,Ncolumns,Nlevels))
+    allocate(x%mwfs_lssnow(Npoints,Ncolumns,Nlevels))
 
   end subroutine construct_cosp_outputs
   
@@ -1803,6 +1821,24 @@ contains
         deallocate(y%NpOUT)
         nullify(y%NpOUT)
      endif
+     if (associated(y%mwfs_lsliq)) then 
+        deallocate(y%mwfs_lsliq)
+        nullify(y%mwfs_lsliq)
+     endif
+     if (associated(y%mwfs_lsice)) then 
+        deallocate(y%mwfs_lsice)
+        nullify(y%mwfs_lsice)
+     endif
+     if (associated(y%mwfs_lsrain)) then 
+        deallocate(y%mwfs_lsrain)
+        nullify(y%mwfs_lsrain)
+     endif
+     if (associated(y%mwfs_lssnow)) then 
+        deallocate(y%mwfs_lssnow)
+        nullify(y%mwfs_lssnow)
+     endif
+
+
    end subroutine destroy_cosp_outputs
   
  end program cosp2_test
