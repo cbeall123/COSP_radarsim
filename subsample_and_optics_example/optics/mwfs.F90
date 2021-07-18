@@ -38,7 +38,7 @@ module mod_mwfs
   implicit none
   
 contains
-  subroutine calc_mwfs(npoints,nlev,at,pfull,mr_hydrolsr,mr_hydrolss,mr_hydrolsl,mr_hydrolsi,&
+subroutine calc_mwfs(npoints,nlev,at,pfull,mr_hydrolsr,mr_hydrolss,mr_hydrolsl,mr_hydrolsi,&
 		       Niclsr,Niclss,Niclsl,Niclsr,mwfs_lsliq,mwfs_lsice,mwfs_lsrain, mwfs_lssnow)
     INTEGER :: npoints,    &    ! Number of model points in the horizontal
                nlev             ! Number of model levels in columns
@@ -225,5 +225,5 @@ contains
     deallocate(rhoa,rhof,arn,asn,lamr,lams,lamc,pgam,lammin,lammax,acn,ain,lami)
 	      	 
 
-  end subroutine calc_mwfs
+end subroutine calc_mwfs
 end module mod_mwfs

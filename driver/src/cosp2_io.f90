@@ -26,7 +26,7 @@ contains
 
     integer :: fileID,status,ij
     integer,dimension(20)  :: dimID
-    integer,dimension(174) :: varID
+    integer,dimension(178) :: varID
     integer,dimension(Npoints) :: loc
     integer,dimension(Ncolumns) :: cosp_scol
     integer,dimension(2) :: bnds
@@ -1687,17 +1687,56 @@ contains
        status = nf90_put_att(fileID,varID(173),"standard_name", "NpCVSNOW")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
-    if (associated(cospOUT%NpOUT)) then                                                                                
+    if (associated(cospOUT%NpOUT)) then                                                                      
        status = nf90_def_var(fileID,"NpLSGRPL",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(174))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
-        status = nf90_put_att(fileID,varID(174),"long_name","large scale (stratiform) graupel number concentration")
+       status = nf90_put_att(fileID,varID(174),"long_name","large scale (stratiform) graupel number concentration")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(174),"units",        "kg-1")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
        status = nf90_put_att(fileID,varID(174),"standard_name", "NpLSGRPL")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
-
+    if (associated(cospOUT%mwfs_lsliq)) then                                                        
+       status = nf90_def_var(fileID,"MWFSLSliq",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(175))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(175),"long_name","large scale (stratiform) liquid mass-weighted fall speed")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(175),"units",        "m/s")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(175),"standard_name", "vtrmc")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mwfs_lsice)) then                                                     
+       status = nf90_def_var(fileID,"MWFSLSice",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(176))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(176),"long_name","large scale (stratiform) ice mass-weighted fall speed")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(176),"units",        "m/s")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(176),"standard_name", "vtrmi")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mwfs_lsrain)) then                                                        
+       status = nf90_def_var(fileID,"MWFSLSrain",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(177))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(177),"long_name","large scale (stratiform) rain mass-weighted fall speed")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(177),"units",        "m/s")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(177),"standard_name", "umr")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mwfs_lssnow)) then                                                                
+       status = nf90_def_var(fileID,"MWFSLSsnow",nf90_float, (/dimID(1),dimID(2),dimID(3)/),varID(178))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(178),"long_name","large scale (stratiform) snow mass-weighted fall speed")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(178),"units",        "m/s")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(178),"standard_name", "ums")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
 
 
 
@@ -2300,6 +2339,26 @@ contains
        status = nf90_put_var(fileID,varID(174),cospOUT%NpOUT(:,:,:,9))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
+    if (associated(cospOUT%mwfs_lsliq)) then
+       status = nf90_put_var(fileID,varID(175),cospOUT%mwfs_lsliq(:,:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mwfs_lsice)) then
+       status = nf90_put_var(fileID,varID(176),cospOUT%mwfs_lsice(:,:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mwfs_lsrain)) then
+       status = nf90_put_var(fileID,varID(177),cospOUT%mwfs_lsrain(:,:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%mwfs_lssnow)) then
+       status = nf90_put_var(fileID,varID(178),cospOUT%mwfs_lssnow(:,:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+
+
+
+
     ! Close file
     status = nf90_close(fileID)
     if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))

@@ -316,7 +316,19 @@ MODULE MOD_COSP
     !NpOUT
      real(wp),dimension(:,:,:,:),pointer :: &
      	  NpOUT => null()        
-     
+    !mwfs_lsliq
+     real(wp),dimension(:,:,:),pointer :: &
+          mwfs_lsliq => null()
+    !mwfs_lsice
+     real(wp),dimension(:,:,:),pointer :: &
+          mwfs_lsice => null()
+    !mwfs_lsrain
+     real(wp),dimension(:,:,:),pointer :: &
+          mwfs_lsrain => null()
+    !mwfs_lssnow
+     real(wp),dimension(:,:,:),pointer :: &
+          mwfs_lssnow => null()
+
   end type cosp_outputs
 
 CONTAINS
@@ -825,6 +837,10 @@ CONTAINS
      cospOUT%mr_hydroOUT(:,:,:,:) = cospIN%mr_hydroOUT
      cospOUT%ReffOUT(:,:,:,:) = cospIN%ReffOUT
      cospOUT%NpOUT(:,:,:,:) = cospIN%NpOUT
+     cospOUT%mwfs_lsliq(:,:,:) = cospIN%mwfs_lsliq
+     cospOUT%mwfs_lsice(:,:,:) = cospIN%mwfs_lsice
+     cospOUT%mwfs_lsrain(:,:,:) = cospIN%mwfs_lsrain
+     cospOUT%mwfs_lssnow(:,:,:) = cospIN%mwfs_lssnow
     
     ! Calipso subcolumn simulator
     if (Lcalipso_subcolumn) then
