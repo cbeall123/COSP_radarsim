@@ -58,13 +58,13 @@ program cosp2_test
   USE mod_quickbeam_optics,only: size_distribution,hydro_class_init,quickbeam_optics,     &
                                  quickbeam_optics_init,gases
   use quickbeam,           only: radar_cfg
-  use mod_mwfs,            only: calc_mwfs
   use mod_cosp,            only: cosp_init,cosp_optical_inputs,cosp_column_inputs,        &
                                  cosp_outputs,cosp_cleanUp,cosp_simulator
   USE mod_rng,             ONLY: rng_state, init_rng
   USE mod_scops,           ONLY: scops
   USE mod_prec_scops,      ONLY: prec_scops
   USE MOD_COSP_UTILS,      ONLY: cosp_precip_mxratio
+  USE mod_mwfs,            ONLY: calc_mwfs
   use cosp_optics,         ONLY: cosp_simulator_optics,lidar_optics,modis_optics,         &
                                  modis_optics_partition
   use mod_cosp_stats,      ONLY: COSP_CHANGE_VERTICAL_GRID
@@ -944,7 +944,11 @@ contains
              fracPrecipIce(:,k,:) = 0._wp
           endwhere
        enddo
-         
+       
+       print*,'mwfs_lsrain 1st sucolumn:',cospIN%mwfs_lsrain(1,1,:)
+       print*,'mwfs_lssnow 1st subcolumn:',cospIN%mwfs_lssnow(1,1,:)
+       print*,'mwfs_lsliq 1st subcolumn:',cospIN%mwfs_lsliq(1,1,:)
+       print*,'mwfs_lsice 1st subcolumn:',cospIN%mwfs_lsice(1,1,:)
        ! Regrid frozen fraction to Cloudsat/Calipso statistical grid
        allocate(fracPrecipIce_statGrid(nPoints,nColumns,Nlvgrid_local))
        fracPrecipIce_statGrid(:,:,:) = 0._wp
