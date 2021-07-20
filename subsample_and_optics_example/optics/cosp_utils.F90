@@ -89,8 +89,11 @@ SUBROUTINE COSP_PRECIP_MXRATIO(Npoints,Nlevels,Ncolumns,p,T,prec_frac,prec_type,
 			   CALL flush(0) 
 			endif
                         mxratio(i,j,k)=mxratio(i,j,k)/rho
-                        ! Compute effective radius
-                        if ((reff(i,j,k) <= 0._wp).and.(flux(i,k) /= 0._wp)) then
+                        if (mxratio(i,j,k).lt.1.E-18) then !Adding EAM qsmall threshold here - cmb
+                          mxratio(i,j,k)=0.0
+                        endif
+                        ! Compute effective radius, adding EAM qsmall threshold here - cmb
+                        if ((reff(i,j,k) <= 0._wp).and.(flux(i,k) /= 0._wp).and.(mxratio(i,j,k).ge.1.E-18)) then
                            lambda_x = (a_x*c_x*((rho0/rho)**g_x)*n_ax*gamma1/flux(i,k))**(1._wp/delta)
                            reff(i,j,k) = gamma_4_3_2/lambda_x
                         endif

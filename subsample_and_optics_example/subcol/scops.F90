@@ -127,8 +127,8 @@ contains
     piast(:,:) = 0.0
     
     !Adjust alst and aist to eliminate places where cloud fraction indicates cloud but mixing ratio is < qsmall - cmb
-    where(mr_lsliq.le.1E-18) alst = 0.0
-    where(mr_lsice.le.1E-18) aist = 0.0
+    where(mr_lsliq.lt.1E-18) alst = 0.0
+    where(mr_lsice.lt.1E-18) aist = 0.0
 
     do j=1,npoints
        do ilev=1,nlev
@@ -139,7 +139,7 @@ contains
     enddo       
     
     !Adding condition to eliminate ice or liquid stratiform when mixing ratio < qsmall from EAM 
-    where(mr_lsliq.le.1E-18 .or. mr_lsice.le.1E-18) amix = 0.0
+    where(mr_lsliq.lt.1E-18 .or. mr_lsice.lt.1E-18) amix = 0.0
     print*,'amix lev 60-65:',amix(1,60:65)
     print*,'aist:',aist(1,60:65)
     print*,'piast:',piast(1,60:65)
@@ -241,7 +241,7 @@ contains
           
           ! Fill frac_out with 1's where tca is greater than the threshold
           frac_out(1:npoints,ibox,ilev) = merge(1,0,(tca(1:npoints,ilev).gt.threshold(1:npoints,ibox) &
-	  	.and. (mr_lsliq(1:npoints,ilev)+mr_lsice(1:npoints,ilev)).gt.1E-18))
+	  	.and. (mr_lsliq(1:npoints,ilev)+mr_lsice(1:npoints,ilev)).ge.1E-18))
           
           ! Code to partition boxes into startiform and convective parts goes here
           where(threshold(1:npoints,ibox).le.conv(1:npoints,ilev) .and. conv(1:npoints,ilev).gt.0.) frac_out(1:npoints,ibox,ilev)=2
@@ -255,19 +255,19 @@ contains
 	  !piast(1:npoints,ilev)) !scaling by the total stratiform cloud fraction since we have selected these subcols already
 
 	  where(ranscol(1:npoints,ibox,ilev).lt.amix(1:npoints,ilev) &
-	  .and. mr_lsliq(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=5
+	  .and. mr_lsliq(1:npoints,ilev).ge.1E-18) frac_outls(1:npoints,ibox,ilev)=5
 
 	  where(ranscol(1:npoints,ibox,ilev).ge.amix(1:npoints,ilev) .and. &
 	  ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev)) .and. &
-	  mr_lsliq(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=3
+	  mr_lsliq(1:npoints,ilev).ge.1E-18) frac_outls(1:npoints,ibox,ilev)=3
 
 	  !where(frac_out(1:npoints,ibox,ilev).eq.1. .and. ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + &
 	  !plast(1:npoints,ilev)) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev) &
-	  !+ piast(1:npoints,ilev)) .and. mr_lsice(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=4
+	  !+ piast(1:npoints,ilev)) .and. mr_lsice(1:npoints,ilev).ge.1E-18) frac_outls(1:npoints,ibox,ilev)=4
 
 	  where(ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + &
 	  plast(1:npoints,ilev)) .and. ranscol(1:npoints,ibox,ilev).lt.(amix(1:npoints,ilev) + plast(1:npoints,ilev) &
-	  + piast(1:npoints,ilev)) .and. mr_lsice(1:npoints,ilev).gt.1E-18) frac_outls(1:npoints,ibox,ilev)=4
+	  + piast(1:npoints,ilev)) .and. mr_lsice(1:npoints,ilev).ge.1E-18) frac_outls(1:npoints,ibox,ilev)=4
 
 	  where(ranscol(1:npoints,ibox,ilev).ge.(amix(1:npoints,ilev) + plast(1:npoints,ilev) &
 	  + piast(1:npoints,ilev))) frac_outls(1:npoints,ibox,ilev)=0
