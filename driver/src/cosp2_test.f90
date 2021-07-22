@@ -499,7 +499,9 @@ program cosp2_test
      allocate(cospIN%mwfs_lsice(nPtsPerIt,nColumns,nLevels))
      allocate(cospIN%mwfs_lsrain(nPtsPerIt,nColumns,nLevels))
      allocate(cospIN%mwfs_lssnow(nPtsPerIt,nColumns,nLevels))
-
+     allocate(cospIN%pfull(nPtsPerIt,nLevels))
+     allocate(cospIN%at(nPtsPerIt,nLevels))
+     allocate(cospIN%hgt(nPtsPerIt,nLevels))
      !allocate(cospIN%frac_outls(nPtsPerIt,nColumns,nLevels))
      !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
      ! Generate subcolumns and compute optical inputs.
@@ -846,6 +848,9 @@ contains
     endif
     cospIN%mr_hydroOUT = mr_hydro
     cospIN%ReffOUT = Reff
+    cospIN%pfull = cospstateIN%pfull
+    cospIN%at = cospstateIN%at
+    cospIN%hgt = cospstateIN%hgt_matrix
     !cospIN%NpOUT = Np
     !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ! 11 micron emissivity
@@ -1426,6 +1431,9 @@ contains
     allocate(x%mwfs_lsice(Npoints,Ncolumns,Nlevels))
     allocate(x%mwfs_lsrain(Npoints,Ncolumns,Nlevels))
     allocate(x%mwfs_lssnow(Npoints,Ncolumns,Nlevels))
+    allocate(x%pfull(Npoints,Nlevels))
+    allocate(x%at(Npoints,Nlevels))
+    allocate(x%hgt(Npoints,Nlevels))
 
   end subroutine construct_cosp_outputs
   
@@ -1841,6 +1849,19 @@ contains
         deallocate(y%mwfs_lssnow)
         nullify(y%mwfs_lssnow)
      endif
+     ! if (associated(y%pfull)) then 
+     !    deallocate(y%pfull)
+     !    nullify(y%pfull)
+     ! endif
+     ! if (associated(y%at)) then 
+     !    deallocate(y%at)
+     !    nullify(y%at)
+     ! endif
+     if (associated(y%hgt)) then 
+        deallocate(y%hgt)
+        nullify(y%hgt)
+     endif
+
 
 
    end subroutine destroy_cosp_outputs

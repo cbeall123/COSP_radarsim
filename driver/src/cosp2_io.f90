@@ -26,7 +26,7 @@ contains
 
     integer :: fileID,status,ij
     integer,dimension(20)  :: dimID
-    integer,dimension(178) :: varID
+    integer,dimension(181) :: varID
     integer,dimension(Npoints) :: loc
     integer,dimension(Ncolumns) :: cosp_scol
     integer,dimension(2) :: bnds
@@ -1737,6 +1737,38 @@ contains
        status = nf90_put_att(fileID,varID(178),"standard_name", "ums")
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
+    if (associated(cospOUT%pfull)) then                                                                
+       status = nf90_def_var(fileID,"pfull",nf90_float, (/dimID(1),dimID(3)/),varID(179))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(179),"long_name","pressure levels, full")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(179),"units",        "Pa")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(179),"standard_name", "pfull")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%at)) then                                                                
+       status = nf90_def_var(fileID,"temperature",nf90_float, (/dimID(1),dimID(3)/),varID(180))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(180),"long_name","absolute temperature")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(180),"units",        "K")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(180),"standard_name", "at")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%hgt)) then                                                                
+       status = nf90_def_var(fileID,"height",nf90_float, (/dimID(1),dimID(3)/),varID(181))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+        status = nf90_put_att(fileID,varID(181),"long_name","altitude levels, full")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(181),"units",        "m")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+       status = nf90_put_att(fileID,varID(181),"standard_name", "hgt")
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+
+
 
 
 
@@ -2355,6 +2387,20 @@ contains
        status = nf90_put_var(fileID,varID(178),cospOUT%mwfs_lssnow(:,:,:))
        if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
     endif
+    if (associated(cospOUT%pfull)) then
+       status = nf90_put_var(fileID,varID(179),cospOUT%pfull(:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%at)) then
+       status = nf90_put_var(fileID,varID(180),cospOUT%at(:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+    if (associated(cospOUT%hgt)) then
+       status = nf90_put_var(fileID,varID(181),cospOUT%hgt(:,:))
+       if (status .ne. nf90_NoERR) print*,trim(nf90_strerror(status))
+    endif
+
+
 
 
 

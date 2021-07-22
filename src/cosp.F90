@@ -175,6 +175,9 @@ MODULE MOD_COSP
      real(wp),allocatable,dimension(:,:,:) :: mwfs_lsice
      real(wp),allocatable,dimension(:,:,:) :: mwfs_lsrain
      real(wp),allocatable,dimension(:,:,:) :: mwfs_lssnow
+     real(wp),allocatable,dimension(:,:) :: pfull
+     real(wp),allocatable,dimension(:,:) :: at
+     real(wp),allocatable,dimension(:,:) :: hgt
   end type cosp_optical_inputs
 
   ! ######################################################################################
@@ -328,6 +331,17 @@ MODULE MOD_COSP
     !mwfs_lssnow
      real(wp),dimension(:,:,:),pointer :: &
           mwfs_lssnow => null()
+    !pfull
+     real(wp),dimension(:,:),pointer :: &
+          pfull => null()
+    !at
+     real(wp),dimension(:,:),pointer :: &
+          at => null()
+    !hgt
+     real(wp),dimension(:,:),pointer :: &
+          hgt => null()
+
+
 
   end type cosp_outputs
 
@@ -841,6 +855,9 @@ CONTAINS
      cospOUT%mwfs_lsice(:,:,:) = cospIN%mwfs_lsice
      cospOUT%mwfs_lsrain(:,:,:) = cospIN%mwfs_lsrain
      cospOUT%mwfs_lssnow(:,:,:) = cospIN%mwfs_lssnow
+     cospOUT%pfull(:,:) = cospIN%pfull
+     cospOUT%at(:,:) = cospIN%at
+     cospOUT%hgt(:,:) = cospIN%hgt
     
     ! Calipso subcolumn simulator
     if (Lcalipso_subcolumn) then
