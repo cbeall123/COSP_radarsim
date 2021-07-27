@@ -518,7 +518,7 @@ program cosp2_test
           dtau_c(start_idx:end_idx,nLevels:1:-1),dtau_s(start_idx:end_idx,nLevels:1:-1),       &
           dem_c(start_idx:end_idx,nLevels:1:-1),dem_s(start_idx:end_idx,nLevels:1:-1),         &
           cospstateIN,cospIN)
-     print*, 'use-precip: ',use_precipitation_fluxes
+     !print*, 'use-precip: ',use_precipitation_fluxes
      !print*, 'mr_hydro after subsample call: ', cospIN%mr_hydroOUT(99,3,:,1)
      call cpu_time(driver_time(6))
     
@@ -950,10 +950,10 @@ contains
           endwhere
        enddo
        
-       print*,'mwfs_lsrain 1st sucolumn:',cospIN%mwfs_lsrain(1,1,:)
-       print*,'mwfs_lssnow 1st subcolumn:',cospIN%mwfs_lssnow(1,1,:)
-       print*,'mwfs_lsliq 1st subcolumn:',cospIN%mwfs_lsliq(1,1,:)
-       print*,'mwfs_lsice 1st subcolumn:',cospIN%mwfs_lsice(1,1,:)
+       !print*,'mwfs_lsrain 1st sucolumn:',cospIN%mwfs_lsrain(1,1,:)
+       !print*,'mwfs_lssnow 1st subcolumn:',cospIN%mwfs_lssnow(1,1,:)
+       !print*,'mwfs_lsliq 1st subcolumn:',cospIN%mwfs_lsliq(1,1,:)
+       !print*,'mwfs_lsice 1st subcolumn:',cospIN%mwfs_lsice(1,1,:)
        ! Regrid frozen fraction to Cloudsat/Calipso statistical grid
        allocate(fracPrecipIce_statGrid(nPoints,nColumns,Nlvgrid_local))
        fracPrecipIce_statGrid(:,:,:) = 0._wp
